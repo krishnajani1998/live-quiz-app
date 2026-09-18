@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Host</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        body { font-family: 'Montserrat', Arial, sans-serif; background: #f2f2f2; text-align: center; margin: 0; padding: 20px; overflow-x: hidden; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.95); padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; border-radius: 8px;}
+        .btn-group { display: flex; gap: 10px; align-items: center; }
+        .btn { padding: 12px 24px; font-size: 16px; cursor: pointer; border: none; border-radius: 4px; color: white; font-weight: bold; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: 0.1s;}
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        #nextBtn { background: #46178f; } 
+        #leaderboardBtn { background: #333333; } 
+        #resetBtn { background: #e21b3c; } 
+        #qrBtn { background: #1368ce; }
+        
+        select { padding: 10px; font-size: 16px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; }
+
+        #qDisplay { font-size: 36px; font-weight: bold; margin: 20px auto; color: #333; min-height: 80px; background: rgba(255,255,255,0.9); padding: 20px 40px; border-radius: 12px; display: inline-block; max-width: 90%;}
+        
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 900px; margin: 0 auto; display: none; }
+        .opt-card { padding: 20px; font-size: 20px; color: white; border-radius: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; font-weight: bold; text-align: left; overflow: hidden; transition: all 0.3s ease;}
+        .opt-card .content-wrap { display: flex; align-items: center; }
+        .opt-card span.shape { font-size: 30px; margin-right: 15px; min-width: 35px; text-align: center; flex-shrink: 0;}
+        
+        #optA { background: #e21b3c; } #optB { background: #1368ce; }
+        #optC { background: #d89e00; } #optD { background: #26890c; }
+        
+        .leaderboard { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: 20px auto; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+        .player-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 2px solid #eee; font-size: 22px; font-weight: bold; color: #333;}
+        
+        .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 15px; height: 350px; margin-top: 30px; display: none; }
+        .podium-column { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; width: 180px;}
+        .podium-name { color: #333; margin-bottom: 5px; font-size: 22px; font-weight: bold; text-align: center; width: 100%; background: white; padding: 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        .podium-score { color: #111; margin-bottom: 10px; font-size: 18px; text-align: center; font-weight: bold;}
+        .podium-step { width: 100%; color: white; font-weight: bold; font-size: 25px; display: flex; align-items: flex-start; justify-content: center; padding-top: 15px; border-radius: 8px 8px 0 0; box-shadow: 0 4px 10px rgba(0,0,0,0.2);}
+        
+        .step-2 { height: 200px; background: #c0c0c0; }
+        .step-1 { height: 280px; background: #ffd700; color: #333; }
+        .step-3 { height: 140px; background: #cd7f32; }
+
+        #playerCounter { font-size: 22px; font-weight: bold; background: #26890c; color: white; padding: 10px 25px; border-radius: 30px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.2); margin-top: -10px; margin-bottom: 15px; }
+        
+        .waiting-room { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 1000px; margin: 0 auto 20px; min-height: 60px; }
+        .name-badge { 
+            background: #46178f; color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 18px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); animation: badgePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0);
+        }
+        @keyframes badgePop { 
+            0% { transform: scale(0); opacity: 0; } 
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; } 
+        }
+        .name-badge.leaving { animation: badgeFade 0.3s ease-in forwards; }
+        @keyframes badgeFade { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
+
+        /* Floating Emojis */
+        .floating-emoji {
+            position: fixed; bottom: -50px; font-size: 45px; pointer-events: none; z-index: 10000;
+            animation: floatUp 3s cubic-bezier(0.25, 1, 0.5, 1) forwards; opacity: 0.9;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            10% { transform: translateY(-50px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-80vh) scale(1); opacity: 0; }
+        }
+
+        /* Print Styles for QR Modal */
+        @media print {
+            body * { visibility: hidden; }
+            #qrModal, #qrModal * { visibility: visible; }
+            #qrModal { position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: white !important; display: flex !important; align-items: center; justify-content: center; }
+            .print-hide { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <h2 style="margin:0; color:#333;">Host Control</h2>
+        <div class="btn-group">
+            <button class="btn" id="qrBtn" onclick="openQrModal()">Show QR Code 📱</button>
+            <select id="modeSelector" onchange="changeQuizMode()">
+                <option value="main">Main Quiz (1 Poll + 11 Qs)</option>
+                <option value="trial">Trial Quiz (2 Qs, No Poll)</option>
+            </select>
+            <button class="btn" id="resetBtn">Reset Game</button>
+            <button class="btn" id="leaderboardBtn">Show Leaderboard</button>
+            <button class="btn" id="nextBtn">Start Quiz (Show Poll)</button>
+        </div>
+    </div>
+
+    <!-- QR Code Modal Popup -->
+    <div id="qrModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:white; padding:40px; border-radius:12px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.3); max-width:420px; width:90%;">
+            <h2 style="margin-top:0; color:#333; font-size:28px;">Scan to Join Quiz! 📱</h2>
+            <div style="margin:20px 0; background:#f9f9f9; padding:15px; border-radius:8px; display:inline-block;">
+                <canvas id="qrCodeCanvasModal"></canvas>
+            </div>
+            <p id="qrUrlText" style="font-size:15px; font-weight:bold; color:#46178f; word-break:break-all; margin-bottom:25px;"></p>
+            <div style="display:flex; gap:12px; justify-content:center;" class="print-hide">
+                <button class="btn" onclick="window.print()" style="background:#26890c;">Print QR 🖨️</button>
+                <button class="btn" onclick="closeQrModal()" style="background:#e21b3c;">Close ✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inline QR Code Join Box -->
+    <div style="background: white; padding: 10px 15px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px;">
+        <canvas id="qrCodeCanvas"></canvas>
+        <div style="font-size: 14px; font-weight: bold; color: #333; margin-top: 5px;">Scan to Join! 📱</div>
+    </div>
+    <br>
+
+    <div id="playerCounter">Players Joined: 0</div>
+    <div id="waitingRoom" class="waiting-room"></div>
+    <h2 id="qDisplay">Ready to Start!</h2>
+
+    <div class="options-grid" id="optionsGrid">
+        <div class="opt-card" id="optA">
+            <div class="content-wrap"><span class="shape">▲</span><span id="textA"></span></div>
+            <div style="text-align:right;"><span id="voteTextA" style="font-size:16px;">0 votes</span><div style="background:rgba(255,255,255,0.2); width:120px; height:8px; border-radius:4px; margin-top:4px; overflow:hidden;"><div id="barA" style="background:white; width:0%; height:100%; transition:width 0.3s;"></div></div></div>
+        </div>
+        <div class="opt-card" id="optB">
+            <div class="content-wrap"><span class="shape">◆</span><span id="textB"></span></div>
+            <div style="text-align:right;"><span id="voteTextB" style="font-size:16px;">0 votes</span><div style="background:rgba(255,255,255,0.2); width:120px; height:8px; border-radius:4px; margin-top:4px; overflow:hidden;"><div id="barB" style="background:white; width:0%; height:100%; transition:width 0.3s;"></div></div></div>
+        </div>
+        <div class="opt-card" id="optC">
+            <div class="content-wrap"><span class="shape">●</span><span id="textC"></span></div>
+            <div style="text-align:right;"><span id="voteTextC" style="font-size:16px;">0 votes</span><div style="background:rgba(255,255,255,0.2); width:120px; height:8px; border-radius:4px; margin-top:4px; overflow:hidden;"><div id="barC" style="background:white; width:0%; height:100%; transition:width 0.3s;"></div></div></div>
+        </div>
+        <div class="opt-card" id="optD">
+            <div class="content-wrap"><span class="shape">■</span><span id="textD"></span></div>
+            <div style="text-align:right;"><span id="voteTextD" style="font-size:16px;">0 votes</span><div style="background:rgba(255,255,255,0.2); width:120px; height:8px; border-radius:4px; margin-top:4px; overflow:hidden;"><div id="barD" style="background:white; width:0%; height:100%; transition:width 0.3s;"></div></div></div>
+        </div>
+    </div>
+
+    <div class="leaderboard" id="leaderboard"></div>
+
+    <div id="podium" class="podium-container">
+        <div class="podium-column"><div class="podium-name" id="name2"></div><div class="podium-score" id="score2"></div><div class="podium-step step-2">2nd</div></div>
+        <div class="podium-column"><div class="podium-name" id="name1"></div><div class="podium-score" id="score1"></div><div class="podium-step step-1">1st 🏆</div></div>
+        <div class="podium-column"><div class="podium-name" id="name3"></div><div class="podium-score" id="score3"></div><div class="podium-step step-3">3rd</div></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        // Use empty io() to automatically connect to the current host domain
+        const socket = io(); 
+
+        // Initialize QR Codes
+        window.addEventListener('DOMContentLoaded', () => {
+            const playerUrl = window.location.origin + "/index.html"; 
+            document.getElementById('qrUrlText').innerText = playerUrl;
+            
+            new QRious({ element: document.getElementById('qrCodeCanvasModal'), value: playerUrl, size: 240 });
+            new QRious({ element: document.getElementById('qrCodeCanvas'), value: playerUrl, size: 130 });
+        });
+
+        function openQrModal() { document.getElementById('qrModal').style.display = 'flex'; }
+        function closeQrModal() { document.getElementById('qrModal').style.display = 'none'; }
+
+        let currentIndex = -1;
+        let finalWinners = [];
+        let questionTimer; 
+        let isCurrentPoll = false;
+        
+        // Trial Quiz Dataset (2 questions, no polls)
+        const trialQuestions = [
+            { q: "Q. ગિરનાર પર્વત કયા શહેરની નજીક આવેલો છે?", a: "રાજકોટ", b: "ભાવનગર", c: "જૂનાગઢ", d: "જામનગર", correct: "C", time: 15 },
+            { q: "Q. દામોદર કુંડ ગિરનારના કયા ભાગમાં આવેલો છે?", a: "શિખર પર", b: "તળેટીમાં", c: "મધ્ય ભાગમાં", d: "ભવનાથથી ઉપર", correct: "B", time: 15 }
+        ];
+
+        // Main Quiz Dataset (1 Poll + 11 Questions)
+        const mainQuizQuestions = [
+            { q: "પોલ: તમે ગિરનાર પર્વત પર કેટલી વાર ચઢ્યા છો?", a: "૧ વાર (1 time)", b: "૨-૫ વાર (2-5 times)", c: "૫+ વાર (5+ times)", d: "ક્યારેય નહીં (Never)", correct: "NONE", time: 20 },
+            { q: "Q 1). ગિરનારનું બીજું પ્રાચીન નામ કયું છે?", a: "રેવતક પર્વત", b: "ગિરિકૂટ", c: "સુવર્ણ પર્વત", d: "દ્રોણગિરિ", correct: "A", time: 15 },
+            { q: "Q2). દામોદર કુંડ કઈ પવિત્ર નદીના પ્રવાહ માર્ગમાં આવેલો છે?", a: "ભાદર નદી", b: "સ્વર્ણરેખા (સોનરખ) નદી", c: "સરસ્વતી નદી", d: "હિરણ નદી", correct: "B", time: 15 },
+            { q: "Q3). રાધા દામોદર મંદિરમાં દામોદરજીનું સ્વરૂપ કેટલા હાથવાળું દર્શાવવામાં આવ્યું છે?", a: "બે હાથ", b: "ચાર હાથ", c: "છ હાથ", d: "આઠ હાથ", correct: "B", time: 15 },
+            { q: "Q4). રાધા દામોદર મંદિરમાં ભગવાન દામોદરજીની મૂર્તિનું સ્વરૂપ કયા પથ્થરમાંથી કંડારાયેલું છે?", a: "શ્વેત આરસની મૂર્તિ", b: "શ્યામ શિલા (સાલિગ્રામ) માંથી કંડારેલી મૂર્તિ", c: "કાંસાની પંચધાતુ મૂર્તિ", d: "મધ્યમ આરસની ત્રિભંગ મૂર્તિ", correct: "B", time: 15 },
+            { q: "Q5). દામોદરજીના ચાર હાથમાં કયા આયુધો દર્શાવવામાં આવ્યા છે?", a: "ધનુષ, બાણ, તલવાર, ગદા", b: "શંખ, ચક્ર, ગદા, કમળ", c: "ત્રિશૂળ, ડમરુ, ચક્ર, ગદા", d: "કમળ, ધનુષ, શંખ, તલવાર", correct: "B", time: 15 },
+            { q: "Q6). દામોદર કુંડની બાજુમાં આવેલું બીજું પવિત્ર કુંડ કયું છે?", a: "ગજપદ કુંડ", b: "રેવતી કુંડ", c: "સૂર્ય કુંડ", d: "બ્રહ્મ કુંડ", correct: "B", time: 15 },
+            { q: "Q 7). જૂનાગઢને અન્ય કયા નામથી પણ ઓળખવામાં આવતું હતું?", a: "ગિરિનગર", b: "ગિરિદુર્ગ", c: "ગિરિવલ્લભ", d: "ગિરિશિખર", correct: "A", time: 15 },
+            { q: "Q8). ગિરિ નારાયણ બ્રાહ્મણોની ઉત્પત્તિની પરંપરામાં નારદ કોને ગિરનાર વિસ્તારમાં લાવ્યા હોવાનું કહેવાય છે?", a: "ઉત્તર ભારતના બ્રાહ્મણો", b: "હિમાલયની તળેટીના ઋષિઓ", c: "દક્ષિણ ભારતના બ્રાહ્મણો", d: "કાશીના પંડિતો", correct: "B", time: 15 },
+            { q: "Q9) કયા પુરાણમાં ગિરિનારાયણ બ્રાહ્મણોનો ઉલ્લેખ જોવા મળે છે?", a: "સ્કંદ પુરાણ", b: "વિષ્ણુ પુરાણ", c: "બ્રહ્મ પુરાણ", d: "નારદ પુરાણ", correct: "A", time: 15 },
+            { q: "Q 10) . ગિરનાર મહાત્મ્યની પરંપરા અનુસાર ગિરિનારાયણ વિપ્રોને વસ્ત્રાપથમાં વસાવવામાં કોનું નામ આવે છે?", a: "રાજા ભોજ", b: "રાજા ચંદ્રકેતુ", c: "રાજા સિદ્ધરાજ", d: "રાજા કુમારપાળ", correct: "B", time: 15 },
+            { q: "Q11) ગિરિનારાયણ બ્રાહ્મણોના મૂળ કઈ પ્રાચિન આર્ય બ્રાહ્મણ સંસ્થામાં મળી આવે છે?", a: "પંચ ગૌડ", b: "સારસ્વત ગૌડ તથા મૈથિલ ગૌડ", c: "સૌરાષ્ટ્ર દ્રવિડ તથા ગુર્જર ગૌડ", d: "પંચ દ્રવિડ", correct: "C", time: 15 }
+        ];
+
+        let quizQuestions = mainQuizQuestions;
+
+        function changeQuizMode() {
+            const mode = document.getElementById("modeSelector").value;
+            quizQuestions = (mode === "trial") ? trialQuestions : mainQuizQuestions;
+            currentIndex = -1;
+            clearTimeout(questionTimer);
+            document.getElementById("qDisplay").innerText = `Loaded ${quizQuestions.length} items. Ready to Start!`;
+            document.getElementById("nextBtn").innerText = mode === "trial" ? "Start Trial Quiz" : "Start Quiz (Show Poll)";
+            document.getElementById("nextBtn").style.display = "inline-block";
+            document.getElementById("leaderboardBtn").style.display = "inline-block";
+            document.getElementById("playerCounter").style.display = "inline-block";
+            document.getElementById("waitingRoom").style.display = "flex";
+            document.getElementById("optionsGrid").style.display = "none";
+            document.getElementById("leaderboard").style.display = "none";
+            document.getElementById("podium").style.display = "none";
+            socket.emit('resetGame');
+        }
+
+        document.getElementById("qDisplay").innerText = `Loaded ${quizQuestions.length} items. Ready to Start!`;
+
+        // MANUALLY TRIGGER THE ANSWER REVEAL WHEN TIMER HITS ZERO
+        function handleTimeUp() {
+            clearTimeout(questionTimer);
+            const currentQ = quizQuestions[currentIndex];
+
+            if (isCurrentPoll) {
+                document.getElementById("qDisplay").innerText = "Poll Closed! 📊";
+            } else {
+                document.getElementById("qDisplay").innerText = "Time's Up! The correct answer is...";
+                
+                ['A', 'B', 'C', 'D'].forEach(opt => {
+                    const el = document.getElementById(`opt${opt}`);
+                    if (opt !== currentQ.correct) {
+                        el.style.opacity = '0.25'; 
+                    } else {
+                        el.style.boxShadow = '0 0 20px 5px rgba(255, 215, 0, 0.8)'; 
+                        el.style.transform = 'scale(1.02)';
+                        document.getElementById(`text${opt}`).innerText += " ✔️"; 
+                    }
+                });
+            }
+        }
+
+        document.getElementById("nextBtn").onclick = () => {
+            clearTimeout(questionTimer); 
+            
+            // Clean up previous answer styles before showing the new question
+            ['A', 'B', 'C', 'D'].forEach(opt => {
+                const el = document.getElementById(`opt${opt}`);
+                el.style.opacity = '1';
+                el.style.boxShadow = '0 4px 0 rgba(0,0,0,0.2)';
+                el.style.transform = 'scale(1)';
+            });
+
+            currentIndex++;
+            
+            if(currentIndex >= quizQuestions.length) {
+                document.getElementById("qDisplay").innerText = "Quiz Finished! Here are the Winners!";
+                document.getElementById("optionsGrid").style.display = "none";
+                document.getElementById("leaderboard").style.display = "none";
+                document.getElementById("nextBtn").style.display = "none"; 
+                document.getElementById("leaderboardBtn").style.display = "none"; 
+                document.getElementById("playerCounter").style.display = "none"; 
+                
+                if(finalWinners[0]) { 
+                    let s1 = typeof finalWinners[0].score === 'number' ? finalWinners[0].score : 0;
+                    document.getElementById("name1").innerText = finalWinners[0].name; document.getElementById("score1").innerText = s1 + " pts"; 
+                }
+                if(finalWinners[1]) { 
+                    let s2 = typeof finalWinners[1].score === 'number' ? finalWinners[1].score : 0;
+                    document.getElementById("name2").innerText = finalWinners[1].name; document.getElementById("score2").innerText = s2 + " pts"; 
+                }
+                if(finalWinners[2]) { 
+                    let s3 = typeof finalWinners[2].score === 'number' ? finalWinners[2].score : 0;
+                    document.getElementById("name3").innerText = finalWinners[2].name; document.getElementById("score3").innerText = s3 + " pts"; 
+                }
+                
+                document.getElementById("podium").style.display = "flex";
+                socket.emit('hostUpdateState', { status: "podium" });
+                return;
+            }
+            
+            const currentQ = quizQuestions[currentIndex];
+            isCurrentPoll = (currentQ.correct === "NONE");
+            
+            document.getElementById("qDisplay").innerText = currentQ.q;
+            document.getElementById("textA").innerText = currentQ.a;
+            document.getElementById("textB").innerText = currentQ.b;
+            document.getElementById("textC").innerText = currentQ.c;
+            document.getElementById("textD").innerText = currentQ.d;
+            
+            document.getElementById("leaderboard").style.display = "none";
+            document.getElementById("podium").style.display = "none";
+            document.getElementById("optionsGrid").style.display = "grid";
+            document.getElementById("waitingRoom").style.display = "none"; 
+            
+            let qTime = parseInt(currentQ.time) || 15;
+            let questionStatus = isCurrentPoll ? "poll" : "active";
+            
+            document.getElementById("nextBtn").innerText = "Next Question";
+            
+            socket.emit('hostUpdateState', {
+                status: questionStatus, questionText: currentQ.q, ansA: currentQ.a, ansB: currentQ.b, ansC: currentQ.c, ansD: currentQ.d, correctAnswer: currentQ.correct, timer: qTime
+            });
+
+            questionTimer = setTimeout(() => handleTimeUp(), qTime * 1000);
+        };
+
+        document.getElementById("leaderboardBtn").onclick = () => {
+            clearTimeout(questionTimer); 
+            
+            if (isCurrentPoll) {
+                alert("Polls don't have scores! Click 'Next Question' to move on.");
+            } else {
+                document.getElementById("qDisplay").innerText = "Live Leaderboard";
+                document.getElementById("optionsGrid").style.display = "none";
+                document.getElementById("leaderboard").style.display = "block";
+                socket.emit('hostUpdateState', { status: "leaderboard" });
+            }
+        };
+
+        document.getElementById("resetBtn").onclick = () => {
+            if(confirm("Reset all scores to zero and restart?")) {
+                clearTimeout(questionTimer);
+                currentIndex = -1;
+                isCurrentPoll = false;
+                document.getElementById("qDisplay").innerText = `Loaded ${quizQuestions.length} items. Ready to Start!`;
+                document.getElementById("nextBtn").innerText = "Start Quiz";
+                document.getElementById("nextBtn").style.display = "inline-block";
+                document.getElementById("leaderboardBtn").style.display = "inline-block";
+                document.getElementById("playerCounter").style.display = "inline-block";
+                document.getElementById("waitingRoom").style.display = "flex"; 
+                document.getElementById("optionsGrid").style.display = "none";
+                document.getElementById("leaderboard").style.display = "none";
+                document.getElementById("podium").style.display = "none";
+                socket.emit('resetGame');
+            }
+        };
+
+        socket.on('pollResultsUpdate', (data) => updateHostStats(typeof data === 'object' && data.votes ? data.votes : data));
+        socket.on('questionStatsUpdate', (stats) => { if (!isCurrentPoll) updateHostStats(stats); });
+
+        function updateHostStats(votes) {
+            let total = votes.A + votes.B + votes.C + votes.D;
+            let pA = total > 0 ? (votes.A / total) * 100 : 0;
+            let pB = total > 0 ? (votes.B / total) * 100 : 0;
+            let pC = total > 0 ? (votes.C / total) * 100 : 0;
+            let pD = total > 0 ? (votes.D / total) * 100 : 0;
+
+            document.getElementById("voteTextA").innerText = `${votes.A} votes`; document.getElementById("barA").style.width = `${pA}%`;
+            document.getElementById("voteTextB").innerText = `${votes.B} votes`; document.getElementById("barB").style.width = `${pB}%`;
+            document.getElementById("voteTextC").innerText = `${votes.C} votes`; document.getElementById("barC").style.width = `${pC}%`;
+            document.getElementById("voteTextD").innerText = `${votes.D} votes`; document.getElementById("barD").style.width = `${pD}%`;
+        }
+
+        socket.on('playerListUpdate', (players) => {
+            finalWinners = players;
+            document.getElementById("playerCounter").innerText = `Players Joined: ${players.length}`;
+            const waitingRoom = document.getElementById("waitingRoom");
+            const board = document.getElementById("leaderboard");
+            
+            const existingBadges = waitingRoom.querySelectorAll('.name-badge');
+            const existingNames = Array.from(existingBadges).map(b => b.getAttribute('data-name'));
+            const incomingNames = players.map(p => p.name);
+
+            existingBadges.forEach(badge => {
+                const name = badge.getAttribute('data-name');
+                if (!incomingNames.includes(name)) { badge.classList.add('leaving'); setTimeout(() => badge.remove(), 300); }
+            });
+
+            players.forEach((p) => {
+                if (!existingNames.includes(p.name)) {
+                    const badge = document.createElement('div');
+                    badge.className = 'name-badge';
+                    badge.setAttribute('data-name', p.name);
+                    badge.innerText = p.name;
+                    waitingRoom.appendChild(badge);
+                }
+            });
+
+            board.innerHTML = "";
+            players.forEach((p) => {
+                let safeScore = typeof p.score === 'number' ? p.score : (parseInt(p.score) || 0);
+                board.innerHTML += `<div class="player-row"><span>${p.name}</span> <span>${safeScore} pts</span></div>`;
+            });
+        });
+
+        socket.on('showReaction', (emoji) => {
+            const el = document.createElement('div');
+            el.className = 'floating-emoji';
+            el.innerText = emoji;
+            el.style.left = `${Math.floor(Math.random() * 80) + 10}%`;
+            el.style.animationDuration = (Math.random() * 1.5 + 2) + 's';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        });
+    </script>
+</body>
+</html>
