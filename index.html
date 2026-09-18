@@ -301,11 +301,13 @@
             if (state.status === "active" || state.status === "poll") {
                 ['A', 'B', 'C', 'D'].forEach(opt => {
                     const btn = document.getElementById(opt);
-                    btn.style.opacity = '1';
-                    btn.style.boxShadow = '0 4px 0 rgba(0,0,0,0.2)';
-                    btn.style.transform = 'scale(1)';
-                    const textSpan = document.getElementById(`text${opt}`);
-                    textSpan.innerText = textSpan.innerText.replace(" ✔️", "");
+                    if (btn) {
+                        btn.style.opacity = '1';
+                        btn.style.boxShadow = '0 4px 0 rgba(0,0,0,0.2)';
+                        btn.style.transform = 'scale(1)';
+                        const textSpan = document.getElementById(`text${opt}`);
+                        if (textSpan) textSpan.innerText = textSpan.innerText.replace(" ✔️", "");
+                    }
                 });
 
                 hasAnswered = false; myLastChoice = ""; pointsEarned = 0; currentAnswer = state.correctAnswer; isPollActive = (state.correctAnswer === "NONE");
@@ -316,13 +318,17 @@
                 document.getElementById("textC").innerText = state.ansC; document.getElementById("textD").innerText = state.ansD;
                 document.getElementById("playScreen").style.display = "flex";
                 
-                let timeLeft = state.timer || 20; totalTimeLimit = timeLeft; currentTimeLeft = timeLeft;
-                document.getElementById("timerBadge").innerText = timeLeft;
+                let timeLeft = state.timer || 20; 
+                totalTimeLimit = timeLeft; 
+                currentTimeLeft = timeLeft;
+                document.getElementById("timerBadge").innerText = currentTimeLeft;
                 
                 clearInterval(timerInterval);
                 timerInterval = setInterval(() => {
                     currentTimeLeft--; 
-                    document.getElementById("timerBadge").innerText = currentTimeLeft;
+                    if (currentTimeLeft >= 0) {
+                        document.getElementById("timerBadge").innerText = currentTimeLeft;
+                    }
                     if (currentTimeLeft <= 0) { 
                         clearInterval(timerInterval); 
                         revealCorrectAnswerOnPhone(); 
