@@ -33,7 +33,7 @@
         
         .poll-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 12px; margin: 6px 0; border-radius: 8px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; box-sizing: border-box;}
         
-        #mobileLobby { display: none; flex-direction: column; align-items: center; width: 100%; margin-top: 20px; }
+        #mobileLobby { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 20px; }
         #mobileCounter { background: #26890c; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-bottom: 15px;}
 
         /* --- ANIMATED LEADERBOARD TILES --- */
@@ -57,7 +57,7 @@
 
     <div id="waitScreen" style="display:none;">
         <h2 id="waitTitle" style="margin-bottom: 5px;">Connecting...</h2>
-        <div id="waitTimerDisplay" style="font-size: 45px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 5px 30px; border-radius: 30px; margin: 15px 0; display: none;">15</div>
+        <div id="waitTimerDisplay" style="font-size: 45px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 5px 30px; border-radius: 30px; margin: 15px 0; display: none;">20</div>
         <div id="waitMsg"></div>
         <div id="mobileLobby">
             <div id="mobileCounter">Players Joined: 0</div>
@@ -66,7 +66,7 @@
 
     <div id="playScreen">
         <div class="question-header">
-            <span id="timerBadge">15</span>
+            <span id="timerBadge">20</span>
             <h3 id="mobileQuestionText">Question loading...</h3>
         </div>
         <div class="options-container">
@@ -138,6 +138,7 @@
 
         function renderAnimatedLeaderboard(containerId, playersArray, myName) {
             const container = document.getElementById(containerId);
+            if (!container) return;
             const tileHeight = 75; 
             container.style.height = `${playersArray.length * tileHeight}px`;
 
@@ -176,7 +177,8 @@
             });
         }
 
-        socket.on('playerListUpdate', (players) => {
+        socket.on('playerListUpdate', (data) => {
+            let players = Array.isArray(data) ? data : (data.players || []);
             latestPlayers = players;
             document.getElementById("mobileCounter").innerText = `Players Joined: ${players.length}`;
             
@@ -265,7 +267,7 @@
         function showResultsOnPhone() {
             document.getElementById("playScreen").style.display = "none";
             document.getElementById("waitScreen").style.display = "none"; 
-            document.getElementById("mobileLeaderboardScreen").style.display = "none";
+            document.getElementById("mobilePollResultsScreen").style.display = "none";
             document.getElementById("mobilePodiumScreen").style.display = "none";
 
             if (isPollActive) {
@@ -289,6 +291,13 @@
         }
 
         function applyState(state) {
+            document.getElementById("waitTimerDisplay").style.display = "none";
+            document.getElementById("playScreen").style.display = "none";
+            document.getElementById("mobileLeaderboardScreen").style.display = "none";
+            document.getElementById("mobilePollResultsScreen").style.display = "none";
+            document.getElementById("mobilePodiumScreen").style.display = "none";
+            document.getElementById("waitScreen").style.display = "none";
+
             if (state.status === "active" || state.status === "poll") {
                 ['A', 'B', 'C', 'D'].forEach(opt => {
                     const btn = document.getElementById(opt);
@@ -301,12 +310,7 @@
 
                 hasAnswered = false; myLastChoice = ""; pointsEarned = 0; currentAnswer = state.correctAnswer; isPollActive = (state.correctAnswer === "NONE");
                 
-                document.getElementById("waitScreen").style.display = "none";
-                document.getElementById("mobileLeaderboardScreen").style.display = "none"; 
-                document.getElementById("mobilePollResultsScreen").style.display = "none";
-                document.getElementById("mobilePodiumScreen").style.display = "none"; 
                 document.getElementById("loginScreen").style.display = "none";
-                
                 document.getElementById("mobileQuestionText").innerText = state.questionText;
                 document.getElementById("textA").innerText = state.ansA; document.getElementById("textB").innerText = state.ansB;
                 document.getElementById("textC").innerText = state.ansC; document.getElementById("textD").innerText = state.ansD;
@@ -314,26 +318,21 @@
                 
                 let timeLeft = state.timer || 20; totalTimeLimit = timeLeft; currentTimeLeft = timeLeft;
                 document.getElementById("timerBadge").innerText = timeLeft;
-                document.getElementById("waitTimerDisplay").innerText = timeLeft;
                 
                 clearInterval(timerInterval);
                 timerInterval = setInterval(() => {
                     currentTimeLeft--; 
                     document.getElementById("timerBadge").innerText = currentTimeLeft;
-                    document.getElementById("waitTimerDisplay").innerText = currentTimeLeft;
                     if (currentTimeLeft <= 0) { 
                         clearInterval(timerInterval); 
                         revealCorrectAnswerOnPhone(); 
                     }
                 }, 1000);
             } else if (state.status === "leaderboard") {
-                clearInterval(timerInterval); showResultsOnPhone();
+                clearInterval(timerInterval); 
+                showResultsOnPhone();
             } else if (state.status === "podium") {
                 clearInterval(timerInterval);
-                document.getElementById("playScreen").style.display = "none"; 
-                document.getElementById("mobileLeaderboardScreen").style.display = "none"; 
-                document.getElementById("mobilePollResultsScreen").style.display = "none"; 
-                document.getElementById("waitScreen").style.display = "none";
                 
                 const pList = document.getElementById("mobilePodiumList"); 
                 let podiumHtml = `<div style="font-size: 22px; color: #46178f; font-weight: bold; margin-bottom: 20px; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">Total Participants: <span style="font-size: 28px; color: #26890c;">${latestPlayers.length}</span></div>`;
@@ -372,12 +371,11 @@
                 document.getElementById("mobilePodiumScreen").style.display = "flex";
             } else if (state.status === "waiting") {
                 clearInterval(timerInterval);
-                document.getElementById("playScreen").style.display = "none"; document.getElementById("mobileLeaderboardScreen").style.display = "none"; document.getElementById("mobilePollResultsScreen").style.display = "none"; document.getElementById("mobilePodiumScreen").style.display = "none";
                 document.getElementById("waitScreen").style.backgroundColor = "#46178f"; 
                 document.getElementById("waitTitle").innerHTML = "Get Ready!";
                 document.getElementById("waitMsg").innerHTML = "Game starting soon...";
-                document.getElementById("waitTimerDisplay").style.display = "none";
-                document.getElementById("mobileLobby").style.display = "flex"; document.getElementById("waitScreen").style.display = "flex";
+                document.getElementById("mobileLobby").style.display = "flex"; 
+                document.getElementById("waitScreen").style.display = "flex";
             }
         }
 

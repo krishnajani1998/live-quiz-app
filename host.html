@@ -36,7 +36,6 @@
         
         #optA { background: #e21b3c; } #optB { background: #1368ce; } #optC { background: #d89e00; } #optD { background: #26890c; }
         
-        /* --- FASTEST FINGER BANNER STYLES --- */
         .leaderboard { background: transparent; padding: 20px 0; max-width: 700px; margin: 0 auto; display: none; }
         .fastest-finger-banner {
             background: linear-gradient(135deg, #ffd700, #ff8c00);
@@ -106,7 +105,7 @@
         </div>
     </div>
 
-    <div class="join-banner">
+    <div class="join-banner" id="joinBanner">
         <div class="join-text">
             <h3>Ready to Play?</h3>
             <p>Take out your phone and scan to join!</p>
@@ -161,7 +160,6 @@
         </div>
     </div>
 
-    <!-- Leaderboard Container with Fastest Finger Shoutout Banner -->
     <div class="leaderboard" id="leaderboard">
         <div id="fastestFingerBanner" class="fastest-finger-banner" style="display:none;">
             ⚡ Fastest Finger This Round: <span id="fastestFingerName" style="color: #46178f;"></span> (+<span id="fastestFingerPts"></span> pts)
@@ -235,6 +233,7 @@
             document.getElementById("leaderboardBtn").style.display = "inline-block";
             document.getElementById("playerCounter").style.display = "inline-block";
             document.getElementById("waitingRoom").style.display = "flex";
+            document.getElementById("joinBanner").style.display = "inline-flex";
             document.getElementById("optionsGrid").style.display = "none";
             document.getElementById("leaderboard").style.display = "none";
             document.getElementById("podium").style.display = "none";
@@ -285,7 +284,7 @@
                 document.getElementById("nextBtn").style.display = "none"; 
                 document.getElementById("leaderboardBtn").style.display = "none"; 
                 document.getElementById("playerCounter").style.display = "none"; 
-                document.querySelector(".join-banner").style.display = "none";
+                document.getElementById("joinBanner").style.display = "none";
                 
                 if(finalWinners[0]) { 
                     let s1 = typeof finalWinners[0].score === 'number' ? finalWinners[0].score : 0;
@@ -317,7 +316,7 @@
             document.getElementById("podium").style.display = "none";
             document.getElementById("optionsGrid").style.display = "grid";
             document.getElementById("waitingRoom").style.display = "none"; 
-            document.querySelector(".join-banner").style.display = "none"; 
+            document.getElementById("joinBanner").style.display = "none"; 
             
             let qTime = parseInt(currentQ.time) || 20;
             
@@ -347,8 +346,9 @@
             
             document.getElementById("qDisplay").innerText = "Live Leaderboard";
             document.getElementById("optionsGrid").style.display = "none";
+            document.getElementById("waitingRoom").style.display = "none";
+            document.getElementById("podium").style.display = "none";
             
-            // Show or Hide the Fastest Finger banner depending on if someone scored this round
             const ffBanner = document.getElementById("fastestFingerBanner");
             if (latestFastestFinger && latestRoundPoints > 0) {
                 document.getElementById("fastestFingerName").innerText = latestFastestFinger;
@@ -360,6 +360,7 @@
 
             document.getElementById("leaderboard").style.display = "block";
             socket.emit('hostUpdateState', { status: "leaderboard" });
+            renderAnimatedLeaderboard('hostLeaderboardList', finalWinners);
         };
 
         document.getElementById("resetBtn").onclick = () => {
@@ -374,7 +375,7 @@
                 document.getElementById("leaderboardBtn").style.display = "inline-block";
                 document.getElementById("playerCounter").style.display = "inline-block";
                 document.getElementById("waitingRoom").style.display = "flex"; 
-                document.querySelector(".join-banner").style.display = "inline-flex"; 
+                document.getElementById("joinBanner").style.display = "inline-flex"; 
                 document.getElementById("optionsGrid").style.display = "none";
                 document.getElementById("leaderboard").style.display = "none";
                 document.getElementById("podium").style.display = "none";
@@ -397,6 +398,7 @@
 
         function renderAnimatedLeaderboard(containerId, playersArray) {
             const container = document.getElementById(containerId);
+            if (!container) return;
             const tileHeight = 85; 
             container.style.height = `${playersArray.length * tileHeight}px`;
 
@@ -436,11 +438,10 @@
         }
 
         socket.on('playerListUpdate', (data) => {
-            let players = data.players || data; // Fallback compatibility
+            let players = Array.isArray(data) ? data : (data.players || []);
             finalWinners = players;
             
-            // Capture fastest finger data if available
-            if (data.fastestFinger) {
+            if (data && data.fastestFinger) {
                 latestFastestFinger = data.fastestFinger;
                 latestRoundPoints = data.roundPoints;
             }
