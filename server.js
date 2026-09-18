@@ -16,19 +16,17 @@ const io = new Server(server, {
 
 let gameState = { status: 'waiting' };
 let players = {}; 
-let pollVotes = { A: 0, B: 0, C: 0, D: 0 }; 
 let questionVotes = { A: 0, B: 0, C: 0, D: 0 }; 
-let playerChoices = {}; 
 
-// THRESHOLD FLAGS FOR HIGH CONCURRENCY
 let pendingQuestionStats = false;
-let pendingPollStats = false;
 let pendingPlayerList = false;
+
+// Track round points for the Fastest Finger shoutout
+let roundGains = {}; 
 
 io.on('connection', (socket) => {
     socket.emit('gameStateUpdate', gameState);
     socket.emit('playerListUpdate', Object.values(players).sort((a, b) => b.score - a.score));
-    socket.emit('pollResultsUpdate', { votes: pollVotes, playerChoices: playerChoices });
     socket.emit('questionStatsUpdate', questionVotes);
 
     socket.on('joinGame', (name) => {
@@ -38,11 +36,9 @@ io.on('connection', (socket) => {
 
     socket.on('hostUpdateState', (newState) => {
         gameState = { ...gameState, ...newState };
-        if (gameState.status === 'poll' || gameState.status === 'active') {
-            pollVotes = { A: 0, B: 0, C: 0, D: 0 };
+        if (gameState.status === 'active') {
             questionVotes = { A: 0, B: 0, C: 0, D: 0 };
-            playerChoices = {};
-            pendingPollStats = true;
+            roundGains = {}; // Reset round gains for the new question
             pendingQuestionStats = true;
         }
         io.emit('gameStateUpdate', gameState);
@@ -54,18 +50,16 @@ io.on('connection', (socket) => {
             let choice = data.choice || '';
             let isPoll = data.isPoll || false;
 
-            if (isPoll) {
-                if (pollVotes[choice] !== undefined) {
-                    pollVotes[choice]++;
-                    playerChoices[players[socket.id].name] = choice; 
-                    pendingPollStats = true;
-                }
-            } else {
+            if (!isPoll) {
                 if (questionVotes[choice] !== undefined) {
                     questionVotes[choice]++;
                     pendingQuestionStats = true;
                 }
                 players[socket.id].score += pts;
+                
+                // Track points earned in this specific round
+                roundGains[players[socket.id].name] = pts;
+
                 pendingPlayerList = true;
             }
         }
@@ -73,14 +67,12 @@ io.on('connection', (socket) => {
 
     socket.on('resetGame', () => {
         gameState = { status: 'waiting' };
-        pollVotes = { A: 0, B: 0, C: 0, D: 0 };
         questionVotes = { A: 0, B: 0, C: 0, D: 0 };
-        playerChoices = {};
+        roundGains = {};
         for (let id in players) players[id].score = 0; 
         
         io.emit('gameStateUpdate', gameState);
         pendingPlayerList = true;
-        pendingPollStats = true;
         pendingQuestionStats = true;
     });
 
@@ -92,18 +84,26 @@ io.on('connection', (socket) => {
     });
 });
 
-// HIGH-CONCURRENCY THROTTLE LOOP (Every 500ms)
+// Broadcast player list along with the top round earner
 setInterval(() => {
     if (pendingQuestionStats) {
         io.emit('questionStatsUpdate', questionVotes);
         pendingQuestionStats = false;
     }
-    if (pendingPollStats) {
-        io.emit('pollResultsUpdate', { votes: pollVotes, playerChoices: playerChoices });
-        pendingPollStats = false;
-    }
     if (pendingPlayerList) {
-        io.emit('playerListUpdate', Object.values(players).sort((a, b) => b.score - a.score));
+        let sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
+        
+        // Find who gained the most points in this round
+        let fastestFinger = null;
+        let maxPts = 0;
+        for (let name in roundGains) {
+            if (roundGains[name] > maxPts) {
+                maxPts = roundGains[name];
+                fastestFinger = name;
+            }
+        }
+
+        io.emit('playerListUpdate', { players: sortedPlayers, fastestFinger: fastestFinger, roundPoints: maxPts });
         pendingPlayerList = false;
     }
 }, 500); 

@@ -108,8 +108,8 @@
         let myLastChoice = "";
         let hasAnswered = false;
         let timerInterval;
-        let currentTimeLeft = 15;
-        let totalTimeLimit = 15; 
+        let currentTimeLeft = 20;
+        let totalTimeLimit = 20; 
         let pointsEarned = 0;
         let latestPlayers = []; 
         let isPollActive = false;
@@ -312,7 +312,7 @@
                 document.getElementById("textC").innerText = state.ansC; document.getElementById("textD").innerText = state.ansD;
                 document.getElementById("playScreen").style.display = "flex";
                 
-                let timeLeft = state.timer || 15; totalTimeLimit = timeLeft; currentTimeLeft = timeLeft;
+                let timeLeft = state.timer || 20; totalTimeLimit = timeLeft; currentTimeLeft = timeLeft;
                 document.getElementById("timerBadge").innerText = timeLeft;
                 document.getElementById("waitTimerDisplay").innerText = timeLeft;
                 

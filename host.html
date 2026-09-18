@@ -36,7 +36,28 @@
         
         #optA { background: #e21b3c; } #optB { background: #1368ce; } #optC { background: #d89e00; } #optD { background: #26890c; }
         
-        .leaderboard { background: transparent; padding: 20px 0; max-width: 700px; margin: 20px auto; display: none; }
+        /* --- FASTEST FINGER BANNER STYLES --- */
+        .leaderboard { background: transparent; padding: 20px 0; max-width: 700px; margin: 0 auto; display: none; }
+        .fastest-finger-banner {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #333;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            animation: pulseBanner 1.5s infinite alternate;
+        }
+        @keyframes pulseBanner {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.02); }
+        }
+
         #hostLeaderboardList { position: relative; width: 100%; transition: height 0.3s ease; }
         .lb-tile { position: absolute; left: 0; width: 100%; height: 70px; transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; justify-content: space-between; align-items: center; background: white; color: #333; border-radius: 12px; padding: 0 25px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .tile-left { display: flex; align-items: center; gap: 15px; }
@@ -117,9 +138,8 @@
     <div id="waitingRoom" class="waiting-room"></div>
     <h2 id="qDisplay">Ready to Start!</h2>
     
-    <!-- BIG HOST TIMER -->
     <div id="hostTimerContainer" style="display:none; justify-content:center; margin-bottom: 25px;">
-        <div id="hostTimer" style="font-size: 55px; font-weight: bold; background: #e21b3c; color: white; border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 4px solid white;">15</div>
+        <div id="hostTimer" style="font-size: 55px; font-weight: bold; background: #e21b3c; color: white; border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 4px solid white;">20</div>
     </div>
 
     <div class="options-grid" id="optionsGrid">
@@ -141,7 +161,11 @@
         </div>
     </div>
 
+    <!-- Leaderboard Container with Fastest Finger Shoutout Banner -->
     <div class="leaderboard" id="leaderboard">
+        <div id="fastestFingerBanner" class="fastest-finger-banner" style="display:none;">
+            ⚡ Fastest Finger This Round: <span id="fastestFingerName" style="color: #46178f;"></span> (+<span id="fastestFingerPts"></span> pts)
+        </div>
         <div id="hostLeaderboardList"></div>
     </div>
 
@@ -173,26 +197,27 @@
         let currentIndex = -1;
         let finalWinners = [];
         let questionTimer; 
-        let hostTimerInterval; // Interval for the host's large ticking timer
-        let isCurrentPoll = false;
+        let hostTimerInterval; 
+        let latestFastestFinger = null;
+        let latestRoundPoints = 0;
         
         const trialQuestions = [
-            { q: "Q. ગિરનાર પર્વત કયા શહેરની નજીક આવેલો છે?", a: "રાજકોટ", b: "ભાવનગર", c: "જૂનાગઢ", d: "જામનગર", correct: "C", time: 15 },
-            { q: "Q. દામોદર કુંડ ગિરનારના કયા ભાગમાં આવેલો છે?", a: "શિખર પર", b: "તળેટીમાં", c: "મધ્ય ભાગમાં", d: "ભવનાથથી ઉપર", correct: "B", time: 15 }
+            { q: "Q. ગિરનાર પર્વત કયા શહેરની નજીક આવેલો છે?", a: "રાજકોટ", b: "ભાવનગર", c: "જૂનાગઢ", d: "જામનગર", correct: "C", time: 20 },
+            { q: "Q. દામોદર કુંડ ગિરનારના કયા ભાગમાં આવેલો છે?", a: "શિખર પર", b: "તળેટીમાં", c: "મધ્ય ભાગમાં", d: "ભવનાથથી ઉપર", correct: "B", time: 20 }
         ];
 
         const mainQuizQuestions = [
-            { q: "Q 1). ગિરનારનું બીજું પ્રાચીન નામ કયું છે?", a: "રેવતક પર્વત", b: "ગિરિકૂટ", c: "સુવર્ણ પર્વત", d: "દ્રોણગિરિ", correct: "A", time: 15 },
-            { q: "Q2). દામોદર કુંડ કઈ પવિત્ર નદીના પ્રવાહ માર્ગમાં આવેલો છે?", a: "ભાદર નદી", b: "સ્વર્ણરેખા (સોનરખ) નદી", c: "સરસ્વતી નદી", d: "હિરણ નદી", correct: "B", time: 15 },
-            { q: "Q3). રાધા દામોદર મંદિરમાં દામોદરજીનું સ્વરૂપ કેટલા હાથવાળું દર્શાવવામાં આવ્યું છે?", a: "બે હાથ", b: "ચાર હાથ", c: "છ હાથ", d: "આઠ હાથ", correct: "B", time: 15 },
-            { q: "Q4). રાધા દામોદર મંદિરમાં ભગવાન દામોદરજીની મૂર્તિનું સ્વરૂપ કયા પથ્થરમાંથી કંડારાયેલું છે?", a: "શ્વેત આરસની મૂર્તિ", b: "શ્યામ શિલા (સાલિગ્રામ) માંથી કંડારેલી મૂર્તિ", c: "કાંસાની પંચધાતુ મૂર્તિ", d: "મધ્યમ આરસની ત્રિભંગ મૂર્તિ", correct: "B", time: 15 },
-            { q: "Q5). દામોદરજીના ચાર હાથમાં કયા આયુધો દર્શાવવામાં આવ્યા છે?", a: "ધનુષ, બાણ, તલવાર, ગદા", b: "શંખ, ચક્ર, ગદા, કમળ", c: "ત્રિશૂળ, ડમરુ, ચક્ર, ગદા", d: "કમળ, ધનુષ, શંખ, તલવાર", correct: "B", time: 15 },
-            { q: "Q6). દામોદર કુંડની બાજુમાં આવેલું બીજું પવિત્ર કુંડ કયું છે?", a: "ગજપદ કુંડ", b: "રેવતી કુંડ", c: "સૂર્ય કુંડ", d: "બ્રહ્મ કુંડ", correct: "B", time: 15 },
-            { q: "Q 7). જૂનાગઢને અન્ય કયા નામથી પણ ઓળખવામાં આવતું હતું?", a: "ગિરિનગર", b: "ગિરિદુર્ગ", c: "ગિરિવલ્લભ", d: "ગિરિશિખર", correct: "A", time: 15 },
-            { q: "Q8). ગિરિ નારાયણ બ્રાહ્મણોની ઉત્પત્તિની પરંપરામાં નારદ કોને ગિરનાર વિસ્તારમાં લાવ્યા હોવાનું કહેવાય છે?", a: "ઉત્તર ભારતના બ્રાહ્મણો", b: "હિમાલયની તળેટીના ઋષિઓ", c: "દક્ષિણ ભારતના બ્રાહ્મણો", d: "કાશીના પંડિતો", correct: "B", time: 15 },
-            { q: "Q9) કયા પુરાણમાં ગિરિનારાયણ બ્રાહ્મણોનો ઉલ્લેખ જોવા મળે છે?", a: "સ્કંદ પુરાણ", b: "વિષ્ણુ પુરાણ", c: "બ્રહ્મ પુરાણ", d: "નારદ પુરાણ", correct: "A", time: 15 },
-            { q: "Q 10) . ગિરનાર મહાત્મ્યની પરંપરા અનુસાર ગિરિનારાયણ વિપ્રોને વસ્ત્રાપથમાં વસાવવામાં કોનું નામ આવે છે?", a: "રાજા ભોજ", b: "રાજા ચંદ્રકેતુ", c: "રાજા સિદ્ધરાજ", d: "રાજા કુમારપાળ", correct: "B", time: 15 },
-            { q: "Q11) ગિરિનારાયણ બ્રાહ્મણોના મૂળ કઈ પ્રાચિન આર્ય બ્રાહ્મણ સંસ્થામાં મળી આવે છે?", a: "પંચ ગૌડ", b: "સારસ્વત ગૌડ તથા મૈથિલ ગૌડ", c: "સૌરાષ્ટ્ર દ્રવિડ તથા ગુર્જર ગૌડ", d: "પંચ દ્રવિડ", correct: "C", time: 15 }
+            { q: "Q 1). ગિરનારનું બીજું પ્રાચીન નામ કયું છે?", a: "રેવતક પર્વત", b: "ગિરિકૂટ", c: "સુવર્ણ પર્વત", d: "દ્રોણગિરિ", correct: "A", time: 20 },
+            { q: "Q2). દામોદર કુંડ કઈ પવિત્ર નદીના પ્રવાહ માર્ગમાં આવેલો છે?", a: "ભાદર નદી", b: "સ્વર્ણરેખા (સોનરખ) નદી", c: "સરસ્વતી નદી", d: "હિરણ નદી", correct: "B", time: 20 },
+            { q: "Q3). રાધા દામોદર મંદિરમાં દામોદરજીનું સ્વરૂપ કેટલા હાથવાળું દર્શાવવામાં આવ્યું છે?", a: "બે હાથ", b: "ચાર હાથ", c: "છ હાથ", d: "આઠ હાથ", correct: "B", time: 20 },
+            { q: "Q4). રાધા દામોદર મંદિરમાં ભગવાન દામોદરજીની મૂર્તિનું સ્વરૂપ કયા પથ્થરમાંથી કંડારાયેલું છે?", a: "શ્વેત આરસની મૂર્તિ", b: "શ્યામ શિલા (સાલિગ્રામ) માંથી કંડારેલી મૂર્તિ", c: "કાંસાની પંચધાતુ મૂર્તિ", d: "મધ્યમ આરસની ત્રિભંગ મૂર્તિ", correct: "B", time: 20 },
+            { q: "Q5). દામોદરજીના ચાર હાથમાં કયા આયુધો દર્શાવવામાં આવ્યા છે?", a: "ધનુષ, બાણ, તલવાર, ગદા", b: "શંખ, ચક્ર, ગદા, કમળ", c: "ત્રિશૂળ, ડમરુ, ચક્ર, ગદા", d: "કમળ, ધનુષ, શંખ, તલવાર", correct: "B", time: 20 },
+            { q: "Q6). દામોદર કુંડની બાજુમાં આવેલું બીજું પવિત્ર કુંડ કયું છે?", a: "ગજપદ કુંડ", b: "રેવતી કુંડ", c: "સૂર્ય કુંડ", d: "બ્રહ્મ કુંડ", correct: "B", time: 20 },
+            { q: "Q 7). જૂનાગઢને અન્ય કયા નામથી પણ ઓળખવામાં આવતું હતું?", a: "ગિરિનગર", b: "ગિરિદુર્ગ", c: "ગિરિવલ્લભ", d: "ગિરિશિખર", correct: "A", time: 20 },
+            { q: "Q8). ગિરિ નારાયણ બ્રાહ્મણોની ઉત્પત્તિની પરંપરામાં નારદ કોને ગિરનાર વિસ્તારમાં લાવ્યા હોવાનું કહેવાય છે?", a: "ઉત્તર ભારતના બ્રાહ્મણો", b: "હિમાલયની તળેટીના ઋષિઓ", c: "દક્ષિણ ભારતના બ્રાહ્મણો", d: "કાશીના પંડિતો", correct: "B", time: 20 },
+            { q: "Q9) કયા પુરાણમાં ગિરિનારાયણ બ્રાહ્મણોનો ઉલ્લેખ જોવા મળે છે?", a: "સ્કંદ પુરાણ", b: "વિષ્ણુ પુરાણ", c: "બ્રહ્મ પુરાણ", d: "નારદ પુરાણ", correct: "A", time: 20 },
+            { q: "Q 10) . ગિરનાર મહાત્મ્યની પરંપરા અનુસાર ગિરિનારાયણ વિપ્રોને વસ્ત્રાપથમાં વસાવવામાં કોનું નામ આવે છે?", a: "રાજા ભોજ", b: "રાજા ચંદ્રકેતુ", c: "રાજા સિદ્ધરાજ", d: "રાજા કુમારપાળ", correct: "B", time: 20 },
+            { q: "Q11) ગિરિનારાયણ બ્રાહ્મણોના મૂળ કઈ પ્રાચિન આર્ય બ્રાહ્મણ સંસ્થામાં મળી આવે છે?", a: "પંચ ગૌડ", b: "સારસ્વત ગૌડ તથા મૈથિલ ગૌડ", c: "સૌરાષ્ટ્ર દ્રવિડ તથા ગુર્જર ગૌડ", d: "પંચ દ્રવિડ", correct: "C", time: 20 }
         ];
 
         let quizQuestions = mainQuizQuestions;
@@ -225,22 +250,18 @@
             
             const currentQ = quizQuestions[currentIndex];
 
-            if (isCurrentPoll) {
-                document.getElementById("qDisplay").innerText = "Poll Closed! 📊";
-            } else {
-                document.getElementById("qDisplay").innerText = "Time's Up! The correct answer is...";
-                
-                ['A', 'B', 'C', 'D'].forEach(opt => {
-                    const el = document.getElementById(`opt${opt}`);
-                    if (opt !== currentQ.correct) {
-                        el.style.opacity = '0.25'; 
-                    } else {
-                        el.style.boxShadow = '0 0 20px 5px rgba(255, 215, 0, 0.8)'; 
-                        el.style.transform = 'scale(1.02)';
-                        document.getElementById(`text${opt}`).innerText += " ✔️"; 
-                    }
-                });
-            }
+            document.getElementById("qDisplay").innerText = "Time's Up! The correct answer is...";
+            
+            ['A', 'B', 'C', 'D'].forEach(opt => {
+                const el = document.getElementById(`opt${opt}`);
+                if (opt !== currentQ.correct) {
+                    el.style.opacity = '0.25'; 
+                } else {
+                    el.style.boxShadow = '0 0 20px 5px rgba(255, 215, 0, 0.8)'; 
+                    el.style.transform = 'scale(1.02)';
+                    document.getElementById(`text${opt}`).innerText += " ✔️"; 
+                }
+            });
         }
 
         document.getElementById("nextBtn").onclick = () => {
@@ -285,7 +306,6 @@
             }
             
             const currentQ = quizQuestions[currentIndex];
-            isCurrentPoll = (currentQ.correct === "NONE");
             
             document.getElementById("qDisplay").innerText = currentQ.q;
             document.getElementById("textA").innerText = currentQ.a;
@@ -299,16 +319,14 @@
             document.getElementById("waitingRoom").style.display = "none"; 
             document.querySelector(".join-banner").style.display = "none"; 
             
-            let qTime = parseInt(currentQ.time) || 15;
-            let questionStatus = isCurrentPoll ? "poll" : "active";
+            let qTime = parseInt(currentQ.time) || 20;
             
             document.getElementById("nextBtn").innerText = "Next Question";
             
             socket.emit('hostUpdateState', {
-                status: questionStatus, questionText: currentQ.q, ansA: currentQ.a, ansB: currentQ.b, ansC: currentQ.c, ansD: currentQ.d, correctAnswer: currentQ.correct, timer: qTime
+                status: "active", questionText: currentQ.q, ansA: currentQ.a, ansB: currentQ.b, ansC: currentQ.c, ansD: currentQ.d, correctAnswer: currentQ.correct, timer: qTime
             });
 
-            // Start the visual countdown on Host Screen
             document.getElementById("hostTimerContainer").style.display = "flex";
             let timeLeft = qTime;
             document.getElementById("hostTimer").innerText = timeLeft;
@@ -327,14 +345,21 @@
             clearInterval(hostTimerInterval);
             document.getElementById("hostTimerContainer").style.display = "none";
             
-            if (isCurrentPoll) {
-                alert("Polls don't have scores! Click 'Next Question' to move on.");
+            document.getElementById("qDisplay").innerText = "Live Leaderboard";
+            document.getElementById("optionsGrid").style.display = "none";
+            
+            // Show or Hide the Fastest Finger banner depending on if someone scored this round
+            const ffBanner = document.getElementById("fastestFingerBanner");
+            if (latestFastestFinger && latestRoundPoints > 0) {
+                document.getElementById("fastestFingerName").innerText = latestFastestFinger;
+                document.getElementById("fastestFingerPts").innerText = latestRoundPoints;
+                ffBanner.style.display = "flex";
             } else {
-                document.getElementById("qDisplay").innerText = "Live Leaderboard";
-                document.getElementById("optionsGrid").style.display = "none";
-                document.getElementById("leaderboard").style.display = "block";
-                socket.emit('hostUpdateState', { status: "leaderboard" });
+                ffBanner.style.display = "none";
             }
+
+            document.getElementById("leaderboard").style.display = "block";
+            socket.emit('hostUpdateState', { status: "leaderboard" });
         };
 
         document.getElementById("resetBtn").onclick = () => {
@@ -343,7 +368,6 @@
                 clearInterval(hostTimerInterval);
                 document.getElementById("hostTimerContainer").style.display = "none";
                 currentIndex = -1;
-                isCurrentPoll = false;
                 document.getElementById("qDisplay").innerText = `Loaded ${quizQuestions.length} items. Ready to Start!`;
                 document.getElementById("nextBtn").innerText = "Start Quiz";
                 document.getElementById("nextBtn").style.display = "inline-block";
@@ -358,20 +382,18 @@
             }
         };
 
-        socket.on('questionStatsUpdate', (stats) => { if (!isCurrentPoll) updateHostStats(stats); });
+        socket.on('questionStatsUpdate', (stats) => { 
+            let total = stats.A + stats.B + stats.C + stats.D;
+            let pA = total > 0 ? (stats.A / total) * 100 : 0;
+            let pB = total > 0 ? (stats.B / total) * 100 : 0;
+            let pC = total > 0 ? (stats.C / total) * 100 : 0;
+            let pD = total > 0 ? (stats.D / total) * 100 : 0;
 
-        function updateHostStats(votes) {
-            let total = votes.A + votes.B + votes.C + votes.D;
-            let pA = total > 0 ? (votes.A / total) * 100 : 0;
-            let pB = total > 0 ? (votes.B / total) * 100 : 0;
-            let pC = total > 0 ? (votes.C / total) * 100 : 0;
-            let pD = total > 0 ? (votes.D / total) * 100 : 0;
-
-            document.getElementById("voteTextA").innerText = `${votes.A} votes`; document.getElementById("barA").style.width = `${pA}%`;
-            document.getElementById("voteTextB").innerText = `${votes.B} votes`; document.getElementById("barB").style.width = `${pB}%`;
-            document.getElementById("voteTextC").innerText = `${votes.C} votes`; document.getElementById("barC").style.width = `${pC}%`;
-            document.getElementById("voteTextD").innerText = `${votes.D} votes`; document.getElementById("barD").style.width = `${pD}%`;
-        }
+            document.getElementById("voteTextA").innerText = `${stats.A} votes`; document.getElementById("barA").style.width = `${pA}%`;
+            document.getElementById("voteTextB").innerText = `${stats.B} votes`; document.getElementById("barB").style.width = `${pB}%`;
+            document.getElementById("voteTextC").innerText = `${stats.C} votes`; document.getElementById("barC").style.width = `${pC}%`;
+            document.getElementById("voteTextD").innerText = `${stats.D} votes`; document.getElementById("barD").style.width = `${pD}%`;
+        });
 
         function renderAnimatedLeaderboard(containerId, playersArray) {
             const container = document.getElementById(containerId);
@@ -413,8 +435,16 @@
             });
         }
 
-        socket.on('playerListUpdate', (players) => {
+        socket.on('playerListUpdate', (data) => {
+            let players = data.players || data; // Fallback compatibility
             finalWinners = players;
+            
+            // Capture fastest finger data if available
+            if (data.fastestFinger) {
+                latestFastestFinger = data.fastestFinger;
+                latestRoundPoints = data.roundPoints;
+            }
+
             document.getElementById("playerCounter").innerText = `Players Joined: ${players.length}`;
             const waitingRoom = document.getElementById("waitingRoom");
             
