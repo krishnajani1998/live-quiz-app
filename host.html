@@ -64,15 +64,12 @@
         .player-name { font-size: 24px; font-weight: bold; }
         .player-score { font-size: 24px; font-weight: bold; color: #46178f; }
 
-        .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 15px; height: 350px; margin-top: 30px; display: none; }
-        .podium-column { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; width: 180px;}
-        .podium-name { color: #333; margin-bottom: 5px; font-size: 22px; font-weight: bold; text-align: center; width: 100%; background: white; padding: 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
-        .podium-score { color: #111; margin-bottom: 10px; font-size: 18px; text-align: center; font-weight: bold;}
-        .podium-step { width: 100%; color: white; font-weight: bold; font-size: 25px; display: flex; align-items: flex-start; justify-content: center; padding-top: 15px; border-radius: 8px 8px 0 0; box-shadow: 0 4px 10px rgba(0,0,0,0.2);}
+        .podium-container { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 700px; margin: 20px auto 0 auto; max-height: 500px; overflow-y: auto; padding-right: 5px; }
         
-        .step-2 { height: 200px; background: #c0c0c0; }
-        .step-1 { height: 280px; background: #ffd700; color: #333; }
-        .step-3 { height: 140px; background: #cd7f32; }
+        .top15-row { display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 12px; padding: 12px 25px; margin-bottom: 10px; width: 100%; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .top15-row.podium-1 { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #333; border: 2px solid #fff; }
+        .top15-row.podium-2 { background: linear-gradient(135deg, #e0e0e0, #b0b0b0); color: #333; }
+        .top15-row.podium-3 { background: linear-gradient(135deg, #e69a53, #cd7f32); color: white; }
 
         #playerCounter { font-size: 22px; font-weight: bold; background: #26890c; color: white; padding: 10px 25px; border-radius: 30px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.2); margin-top: -10px; margin-bottom: 15px; }
         
@@ -168,9 +165,7 @@
     </div>
 
     <div id="podium" class="podium-container">
-        <div class="podium-column"><div class="podium-name" id="name2"></div><div class="podium-score" id="score2"></div><div class="podium-step step-2">2nd</div></div>
-        <div class="podium-column"><div class="podium-name" id="name1"></div><div class="podium-score" id="score1"></div><div class="podium-step step-1">1st 🏆</div></div>
-        <div class="podium-column"><div class="podium-name" id="name3"></div><div class="podium-score" id="score3"></div><div class="podium-step step-3">3rd</div></div>
+        <div id="top15List" style="width: 100%;"></div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -277,7 +272,7 @@
             currentIndex++;
             
             if(currentIndex >= quizQuestions.length) {
-                document.getElementById("qDisplay").innerText = "Quiz Finished! Here are the Winners!";
+                document.getElementById("qDisplay").innerText = "Quiz Finished! Top 15 Leaderboard 🏆";
                 document.getElementById("hostTimerContainer").style.display = "none";
                 document.getElementById("optionsGrid").style.display = "none";
                 document.getElementById("leaderboard").style.display = "none";
@@ -286,19 +281,24 @@
                 document.getElementById("playerCounter").style.display = "none"; 
                 document.getElementById("joinBanner").style.display = "none";
                 
-                if(finalWinners[0]) { 
-                    let s1 = typeof finalWinners[0].score === 'number' ? finalWinners[0].score : 0;
-                    document.getElementById("name1").innerText = finalWinners[0].name; document.getElementById("score1").innerText = s1 + " pts"; 
-                }
-                if(finalWinners[1]) { 
-                    let s2 = typeof finalWinners[1].score === 'number' ? finalWinners[1].score : 0;
-                    document.getElementById("name2").innerText = finalWinners[1].name; document.getElementById("score2").innerText = s2 + " pts"; 
-                }
-                if(finalWinners[2]) { 
-                    let s3 = typeof finalWinners[2].score === 'number' ? finalWinners[2].score : 0;
-                    document.getElementById("name3").innerText = finalWinners[2].name; document.getElementById("score3").innerText = s3 + " pts"; 
-                }
-                
+                let top15Html = "";
+                finalWinners.slice(0, 15).forEach((p, index) => {
+                    let rankDisplay = index === 0 ? "🥇 1" : index === 1 ? "🥈 2" : index === 2 ? "🥉 3" : (index + 1);
+                    let rowClass = index === 0 ? "top15-row podium-1" : index === 1 ? "top15-row podium-2" : index === 2 ? "top15-row podium-3" : "top15-row";
+                    let scoreVal = typeof p.score === 'number' ? p.score : (parseInt(p.score) || 0);
+
+                    top15Html += `
+                        <div class="${rowClass}">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 20px; font-weight: bold; width: 50px; text-align: left;">#${rankDisplay}</div>
+                                <div style="font-size: 22px; font-weight: bold; text-align: left; max-width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                            </div>
+                            <div style="font-size: 22px; font-weight: bold;">${scoreVal} pts</div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById("top15List").innerHTML = top15Html;
                 document.getElementById("podium").style.display = "flex";
                 socket.emit('hostUpdateState', { status: "podium" });
                 return;
@@ -400,9 +400,11 @@
             const container = document.getElementById(containerId);
             if (!container) return;
             const tileHeight = 85; 
-            container.style.height = `${playersArray.length * tileHeight}px`;
+            
+            const top10Players = playersArray.slice(0, 10);
+            container.style.height = `${top10Players.length * tileHeight}px`;
 
-            const currentIds = playersArray.map(p => p.id);
+            const currentIds = top10Players.map(p => p.id);
 
             Array.from(container.children).forEach(child => {
                 const childId = child.id.replace('host-tile-', '');
@@ -411,7 +413,7 @@
                 }
             });
 
-            playersArray.forEach((p, index) => {
+            top10Players.forEach((p, index) => {
                 let tile = document.getElementById(`host-tile-${p.id}`);
                 let rankHtml = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
 

@@ -183,7 +183,7 @@
             document.getElementById("mobileCounter").innerText = `Players Joined: ${players.length}`;
             
             if (document.getElementById("mobileLeaderboardScreen").style.display === "flex") {
-                renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers, myNameGlobal);
+                renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers.slice(0, 10), myNameGlobal);
             }
         });
 
@@ -280,12 +280,22 @@
             } else {
                 const lbScreen = document.getElementById("mobileLeaderboardScreen");
                 let statusText = "";
+                
+                let myRankIndex = latestPlayers.findIndex(p => p.name === myNameGlobal);
+                let myData = myRankIndex !== -1 ? latestPlayers[myRankIndex] : null;
+                let myScore = myData ? myData.score : 0;
+
                 if (myLastChoice === currentAnswer) { statusText = `Correct! +${pointsEarned} Points`; lbScreen.style.backgroundColor = "#26890c"; } 
                 else if (myLastChoice !== "") { statusText = "Incorrect! Better luck next time."; lbScreen.style.backgroundColor = "#e21b3c"; } 
                 else { statusText = "Time's up! You didn't answer."; lbScreen.style.backgroundColor = "#46178f"; }
-                document.getElementById("myStatusMsg").innerText = statusText;
+
+                if (myRankIndex >= 10) {
+                    statusText += `<br><span style="font-size: 16px; color: #ffd700;">Your Standing: #${myRankIndex + 1} (${myScore} pts)</span>`;
+                }
+
+                document.getElementById("myStatusMsg").innerHTML = statusText;
                 
-                renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers, myNameGlobal);
+                renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers.slice(0, 10), myNameGlobal);
                 lbScreen.style.display = "flex";
             }
         }
@@ -328,7 +338,6 @@
                     currentTimeLeft--; 
                     if (currentTimeLeft >= 0) {
                         document.getElementById("timerBadge").innerText = currentTimeLeft;
-                        // Also update the waiting screen timer badge if locked in
                         const waitBadge = document.getElementById("waitTimerDisplay");
                         if (waitBadge && waitBadge.style.display !== "none") {
                             waitBadge.innerText = currentTimeLeft;
@@ -348,7 +357,7 @@
                 const pList = document.getElementById("mobilePodiumList"); 
                 let podiumHtml = `<div style="font-size: 22px; color: #46178f; font-weight: bold; margin-bottom: 20px; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">Total Participants: <span style="font-size: 28px; color: #26890c;">${latestPlayers.length}</span></div>`;
 
-                latestPlayers.slice(0, 5).forEach((p, index) => {
+                latestPlayers.slice(0, 10).forEach((p, index) => {
                     let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
                     let isMe = p.name === myNameGlobal;
                     let myBg = isMe ? 'background: linear-gradient(135deg, #46178f, #2b0c5e); color: white; border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);' : 'background: white; color: #333; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid transparent;';
@@ -365,7 +374,7 @@
                 });
 
                 let myRankIndex = latestPlayers.findIndex(p => p.name === myNameGlobal);
-                if (myRankIndex >= 5) {
+                if (myRankIndex >= 10) {
                     let p = latestPlayers[myRankIndex];
                     podiumHtml += `<div style="text-align: center; font-weight: bold; margin: 10px 0; color: #46178f; font-size: 24px;">...</div>`;
                     podiumHtml += `
