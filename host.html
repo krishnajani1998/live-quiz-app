@@ -28,9 +28,42 @@
         #optA { background: #e21b3c; } #optB { background: #1368ce; }
         #optC { background: #d89e00; } #optD { background: #26890c; }
         
-        .leaderboard { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: 20px auto; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-        .player-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 2px solid #eee; font-size: 22px; font-weight: bold; color: #333;}
-        
+        /* --- BEAUTIFUL ANIMATED LEADERBOARD TILES --- */
+        .leaderboard { background: transparent; padding: 20px 0; max-width: 700px; margin: 20px auto; display: none; }
+        #hostLeaderboardList { position: relative; width: 100%; transition: height 0.3s ease; }
+        .lb-tile {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            color: #333;
+            border-radius: 12px;
+            padding: 0 25px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .tile-left { display: flex; align-items: center; gap: 15px; }
+        .rank-badge {
+            background: #f2f2f2;
+            color: #333;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .player-name { font-size: 24px; font-weight: bold; }
+        .player-score { font-size: 24px; font-weight: bold; color: #46178f; }
+
         .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 15px; height: 350px; margin-top: 30px; display: none; }
         .podium-column { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; width: 180px;}
         .podium-name { color: #333; margin-bottom: 5px; font-size: 22px; font-weight: bold; text-align: center; width: 100%; background: white; padding: 5px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
@@ -56,17 +89,6 @@
         .name-badge.leaving { animation: badgeFade 0.3s ease-in forwards; }
         @keyframes badgeFade { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
 
-        /* Floating Emojis */
-        .floating-emoji {
-            position: fixed; bottom: -50px; font-size: 45px; pointer-events: none; z-index: 10000;
-            animation: floatUp 3s cubic-bezier(0.25, 1, 0.5, 1) forwards; opacity: 0.9;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            10% { transform: translateY(-50px) scale(1.2); opacity: 1; }
-            100% { transform: translateY(-80vh) scale(1); opacity: 0; }
-        }
-
         /* Print Styles for QR Modal */
         @media print {
             body * { visibility: hidden; }
@@ -82,12 +104,12 @@
         <div class="btn-group">
             <button class="btn" id="qrBtn" onclick="openQrModal()">Show QR Code 📱</button>
             <select id="modeSelector" onchange="changeQuizMode()">
-                <option value="main">Main Quiz (1 Poll + 11 Qs)</option>
+                <option value="main">Main Quiz (11 Qs, No Poll)</option>
                 <option value="trial">Trial Quiz (2 Qs, No Poll)</option>
             </select>
             <button class="btn" id="resetBtn">Reset Game</button>
             <button class="btn" id="leaderboardBtn">Show Leaderboard</button>
-            <button class="btn" id="nextBtn">Start Quiz (Show Poll)</button>
+            <button class="btn" id="nextBtn">Start Quiz</button>
         </div>
     </div>
 
@@ -136,7 +158,10 @@
         </div>
     </div>
 
-    <div class="leaderboard" id="leaderboard"></div>
+    <!-- Animated Host Leaderboard Container -->
+    <div class="leaderboard" id="leaderboard">
+        <div id="hostLeaderboardList"></div>
+    </div>
 
     <div id="podium" class="podium-container">
         <div class="podium-column"><div class="podium-name" id="name2"></div><div class="podium-score" id="score2"></div><div class="podium-step step-2">2nd</div></div>
@@ -146,10 +171,8 @@
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // Use empty io() to automatically connect to the current host domain
         const socket = io(); 
 
-        // Initialize QR Codes
         window.addEventListener('DOMContentLoaded', () => {
             const playerUrl = window.location.origin + "/index.html"; 
             document.getElementById('qrUrlText').innerText = playerUrl;
@@ -166,15 +189,13 @@
         let questionTimer; 
         let isCurrentPoll = false;
         
-        // Trial Quiz Dataset (2 questions, no polls)
         const trialQuestions = [
             { q: "Q. ગિરનાર પર્વત કયા શહેરની નજીક આવેલો છે?", a: "રાજકોટ", b: "ભાવનગર", c: "જૂનાગઢ", d: "જામનગર", correct: "C", time: 15 },
             { q: "Q. દામોદર કુંડ ગિરનારના કયા ભાગમાં આવેલો છે?", a: "શિખર પર", b: "તળેટીમાં", c: "મધ્ય ભાગમાં", d: "ભવનાથથી ઉપર", correct: "B", time: 15 }
         ];
 
-        // Main Quiz Dataset (1 Poll + 11 Questions)
+        // POLL REMOVED FROM MAIN DATASET
         const mainQuizQuestions = [
-            { q: "પોલ: તમે ગિરનાર પર્વત પર કેટલી વાર ચઢ્યા છો?", a: "૧ વાર (1 time)", b: "૨-૫ વાર (2-5 times)", c: "૫+ વાર (5+ times)", d: "ક્યારેય નહીં (Never)", correct: "NONE", time: 20 },
             { q: "Q 1). ગિરનારનું બીજું પ્રાચીન નામ કયું છે?", a: "રેવતક પર્વત", b: "ગિરિકૂટ", c: "સુવર્ણ પર્વત", d: "દ્રોણગિરિ", correct: "A", time: 15 },
             { q: "Q2). દામોદર કુંડ કઈ પવિત્ર નદીના પ્રવાહ માર્ગમાં આવેલો છે?", a: "ભાદર નદી", b: "સ્વર્ણરેખા (સોનરખ) નદી", c: "સરસ્વતી નદી", d: "હિરણ નદી", correct: "B", time: 15 },
             { q: "Q3). રાધા દામોદર મંદિરમાં દામોદરજીનું સ્વરૂપ કેટલા હાથવાળું દર્શાવવામાં આવ્યું છે?", a: "બે હાથ", b: "ચાર હાથ", c: "છ હાથ", d: "આઠ હાથ", correct: "B", time: 15 },
@@ -185,7 +206,7 @@
             { q: "Q8). ગિરિ નારાયણ બ્રાહ્મણોની ઉત્પત્તિની પરંપરામાં નારદ કોને ગિરનાર વિસ્તારમાં લાવ્યા હોવાનું કહેવાય છે?", a: "ઉત્તર ભારતના બ્રાહ્મણો", b: "હિમાલયની તળેટીના ઋષિઓ", c: "દક્ષિણ ભારતના બ્રાહ્મણો", d: "કાશીના પંડિતો", correct: "B", time: 15 },
             { q: "Q9) કયા પુરાણમાં ગિરિનારાયણ બ્રાહ્મણોનો ઉલ્લેખ જોવા મળે છે?", a: "સ્કંદ પુરાણ", b: "વિષ્ણુ પુરાણ", c: "બ્રહ્મ પુરાણ", d: "નારદ પુરાણ", correct: "A", time: 15 },
             { q: "Q 10) . ગિરનાર મહાત્મ્યની પરંપરા અનુસાર ગિરિનારાયણ વિપ્રોને વસ્ત્રાપથમાં વસાવવામાં કોનું નામ આવે છે?", a: "રાજા ભોજ", b: "રાજા ચંદ્રકેતુ", c: "રાજા સિદ્ધરાજ", d: "રાજા કુમારપાળ", correct: "B", time: 15 },
-            { q: "Q11) ગિરિનારાયણ બ્રાહ્મણોના મૂળ કઈ પ્રાચિન આર્ય બ્રાહ્મણ સંસ્થામાં મળી આવે છે?", a: "પંચ ગૌડ", b: "સારસ્વત ગૌડ તથા મૈથિલ ગૌડ", c: "સૌરાષ્ટ્ર દ્રવિડ તથા ગુર્જર ગૌડ", d: "પંચ દ્રવિડ", correct: "C", time: 15 }
+            { q: "Q11) ગિરિનારાયણ બ્રાહ્મણોના મૂળ કઈ પ્રાચિન આર્ય બ્રાહ્મણ સંસ્થામાં મળી આવે છે?", a: "પંચ ગૌડ", b: "સારસ્વત ગૌડ તથા મૈથિલ ગૌડ", c: "સૌરાષ્ટ્ર દ્રવિડ તથા ગુર્જર ગૌડ", d: "પંચ દ્રવિડ", correct: "C", time: 15 }[cite: 1]
         ];
 
         let quizQuestions = mainQuizQuestions;
@@ -196,7 +217,7 @@
             currentIndex = -1;
             clearTimeout(questionTimer);
             document.getElementById("qDisplay").innerText = `Loaded ${quizQuestions.length} items. Ready to Start!`;
-            document.getElementById("nextBtn").innerText = mode === "trial" ? "Start Trial Quiz" : "Start Quiz (Show Poll)";
+            document.getElementById("nextBtn").innerText = mode === "trial" ? "Start Trial Quiz" : "Start Quiz";
             document.getElementById("nextBtn").style.display = "inline-block";
             document.getElementById("leaderboardBtn").style.display = "inline-block";
             document.getElementById("playerCounter").style.display = "inline-block";
@@ -209,7 +230,6 @@
 
         document.getElementById("qDisplay").innerText = `Loaded ${quizQuestions.length} items. Ready to Start!`;
 
-        // MANUALLY TRIGGER THE ANSWER REVEAL WHEN TIMER HITS ZERO
         function handleTimeUp() {
             clearTimeout(questionTimer);
             const currentQ = quizQuestions[currentIndex];
@@ -235,7 +255,6 @@
         document.getElementById("nextBtn").onclick = () => {
             clearTimeout(questionTimer); 
             
-            // Clean up previous answer styles before showing the new question
             ['A', 'B', 'C', 'D'].forEach(opt => {
                 const el = document.getElementById(`opt${opt}`);
                 el.style.opacity = '1';
@@ -344,11 +363,51 @@
             document.getElementById("voteTextD").innerText = `${votes.D} votes`; document.getElementById("barD").style.width = `${pD}%`;
         }
 
+        // DOM Animation Logic for Host Leaderboard
+        function renderAnimatedLeaderboard(containerId, playersArray) {
+            const container = document.getElementById(containerId);
+            const tileHeight = 85; // 70px tile + 15px gap
+            container.style.height = `${playersArray.length * tileHeight}px`;
+
+            const currentIds = playersArray.map(p => p.id);
+
+            Array.from(container.children).forEach(child => {
+                const childId = child.id.replace('host-tile-', '');
+                if (!currentIds.includes(childId)) {
+                    child.remove();
+                }
+            });
+
+            playersArray.forEach((p, index) => {
+                let tile = document.getElementById(`host-tile-${p.id}`);
+                let rankHtml = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
+
+                if (!tile) {
+                    tile = document.createElement('div');
+                    tile.id = `host-tile-${p.id}`;
+                    tile.className = 'lb-tile';
+                    
+                    tile.innerHTML = `
+                        <div class="tile-left">
+                            <div class="rank-badge" id="host-rank-${p.id}">${rankHtml}</div>
+                            <div class="player-name">${p.name}</div>
+                        </div>
+                        <div class="player-score" id="host-score-${p.id}">${p.score} pts</div>
+                    `;
+                    container.appendChild(tile);
+                } else {
+                    document.getElementById(`host-score-${p.id}`).innerText = `${p.score} pts`;
+                    document.getElementById(`host-rank-${p.id}`).innerText = rankHtml;
+                }
+                
+                tile.style.top = `${index * tileHeight}px`;
+            });
+        }
+
         socket.on('playerListUpdate', (players) => {
             finalWinners = players;
             document.getElementById("playerCounter").innerText = `Players Joined: ${players.length}`;
             const waitingRoom = document.getElementById("waitingRoom");
-            const board = document.getElementById("leaderboard");
             
             const existingBadges = waitingRoom.querySelectorAll('.name-badge');
             const existingNames = Array.from(existingBadges).map(b => b.getAttribute('data-name'));
@@ -369,21 +428,10 @@
                 }
             });
 
-            board.innerHTML = "";
-            players.forEach((p) => {
-                let safeScore = typeof p.score === 'number' ? p.score : (parseInt(p.score) || 0);
-                board.innerHTML += `<div class="player-row"><span>${p.name}</span> <span>${safeScore} pts</span></div>`;
-            });
-        });
-
-        socket.on('showReaction', (emoji) => {
-            const el = document.createElement('div');
-            el.className = 'floating-emoji';
-            el.innerText = emoji;
-            el.style.left = `${Math.floor(Math.random() * 80) + 10}%`;
-            el.style.animationDuration = (Math.random() * 1.5 + 2) + 's';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 3500);
+            // Animate Leaderboard on the Host Screen
+            if (document.getElementById("leaderboard").style.display === "block") {
+                renderAnimatedLeaderboard('hostLeaderboardList', players);
+            }
         });
     </script>
 </body>

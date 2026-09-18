@@ -5,7 +5,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
-app.use(express.static(__dirname)); // Serves your HTML files
+app.use(express.static(__dirname)); 
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -33,7 +33,7 @@ io.on('connection', (socket) => {
 
     socket.on('joinGame', (name) => {
         players[socket.id] = { id: socket.id, name: name, score: 0 };
-        pendingPlayerList = true; // Flag for next batch
+        pendingPlayerList = true; 
     });
 
     socket.on('hostUpdateState', (newState) => {
@@ -69,10 +69,6 @@ io.on('connection', (socket) => {
                 pendingPlayerList = true;
             }
         }
-    });
-
-    socket.on('sendReaction', (emoji) => {
-        io.emit('showReaction', emoji);
     });
 
     socket.on('resetGame', () => {

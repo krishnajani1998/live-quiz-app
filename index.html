@@ -27,35 +27,59 @@
         
         #A { background: #e21b3c; } #B { background: #1368ce; } #C { background: #d89e00; } #D { background: #26890c; }
         
-        #mobileLeaderboardScreen { display: none; background: #333; height: 100vh; color: white; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto;}
+        #mobileLeaderboardScreen { display: none; background: #333; height: 100vh; color: white; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-x: hidden; overflow-y: auto;}
         #mobilePollResultsScreen { display: none; background: #1368ce; height: 100vh; color: white; flex-direction: column; padding: 20px; box-sizing: border-box; justify-content: center; align-items: center;}
         #mobilePodiumScreen { display: none; background: #ffd700; height: 100vh; color: #333; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;}
         
-        .list-container { width: 100%; max-width: 400px; margin: 0 auto; text-align: left; }
-        .lb-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.2); font-size: 18px;}
         .poll-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 12px; margin: 6px 0; border-radius: 8px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; box-sizing: border-box;}
-        .podium-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; font-size: 20px; color: #333;}
         
         #mobileLobby { display: none; flex-direction: column; align-items: center; width: 100%; margin-top: 20px; }
         #mobileCounter { background: #26890c; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-bottom: 15px;}
         #mobileWaitingRoom { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 90%; max-height: 180px; overflow-y: auto;}
         .mobile-badge { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 15px; font-size: 14px; font-weight: bold;}
 
-        /* Floating Emoji Tray Styles */
-        .emoji-tray { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; gap: 15px; background: rgba(0, 0, 0, 0.3); padding: 10px 20px; border-radius: 40px; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .emoji-btn { font-size: 30px; background: none; border: none; cursor: pointer; padding: 0; margin: 0; transition: transform 0.1s; user-select: none; -webkit-tap-highlight-color: transparent; }
-        .emoji-btn:active { transform: scale(1.4); }
-
-        /* Floating Emojis on Mobile */
-        .floating-emoji {
-            position: fixed; bottom: -50px; font-size: 35px; pointer-events: none; z-index: 10000;
-            animation: floatUp 3s cubic-bezier(0.25, 1, 0.5, 1) forwards; opacity: 0.9;
+        /* --- BEAUTIFUL ANIMATED LEADERBOARD TILES --- */
+        #mobileLeaderboardList { position: relative; width: 100%; max-width: 500px; margin: 0 auto; transition: height 0.3s ease; }
+        .lb-tile {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 65px;
+            transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy sliding animation */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            color: #333;
+            border-radius: 12px;
+            padding: 0 15px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            10% { transform: translateY(-50px) scale(1.2); opacity: 1; }
-            100% { transform: translateY(-80vh) scale(1); opacity: 0; }
+        .lb-tile.my-tile {
+            background: linear-gradient(135deg, #46178f, #2b0c5e);
+            color: white;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            z-index: 10;
         }
+        .tile-left { display: flex; align-items: center; gap: 12px; }
+        .rank-badge {
+            background: #f2f2f2;
+            color: #333;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .my-tile .rank-badge { background: #ffd700; color: #46178f; }
+        .player-name { font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; text-align: left; }
+        .player-score { font-size: 18px; font-weight: bold; opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -93,38 +117,28 @@
 
     <div id="mobilePollResultsScreen">
         <h2 style="margin-bottom: 5px;">Poll Results 📊</h2>
-        <p id="pollChoiceEcho" style="margin-bottom: 10px; font-weight: bold; color: #ffd700;"></p>
+        <p id="pollChoiceEcho" style="margin-bottom: 20px; font-weight: bold; color: #ffd700;"></p>
         <div class="poll-row"><span>▲ Option A:</span> <span id="resA">0 votes</span></div>
         <div class="poll-row"><span>◆ Option B:</span> <span id="resB">0 votes</span></div>
         <div class="poll-row"><span>● Option C:</span> <span id="resC">0 votes</span></div>
         <div class="poll-row"><span>■ Option D:</span> <span id="resD">0 votes</span></div>
-        <div id="playerChoicesContainer"></div>
     </div>
 
     <div id="mobileLeaderboardScreen">
-        <h2 style="margin-bottom: 10px;">Live Leaderboard</h2>
-        <h3 id="myStatusMsg" style="color: #ffd700; margin-bottom: 20px;"></h3>
-        <div class="list-container" id="mobileLeaderboardList"></div>
+        <h2 style="margin-bottom: 10px;">Live Rankings</h2>
+        <h3 id="myStatusMsg" style="color: #ffd700; margin-bottom: 20px; font-size: 20px;"></h3>
+        <!-- This is where the animated sliding tiles live -->
+        <div id="mobileLeaderboardList"></div>
     </div>
 
     <div id="mobilePodiumScreen">
         <h1 style="font-size: 35px; margin-bottom: 10px;">🏆 Quiz Finished! 🏆</h1>
-        <p style="font-weight: bold; margin-bottom: 20px;">Final Standings</p>
-        <div class="list-container" id="mobilePodiumList" style="background: white; border-radius: 8px; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);"></div>
-    </div>
-
-    <!-- Floating Emoji Spawner Tray -->
-    <div class="emoji-tray" id="emojiTray">
-        <button class="emoji-btn" onclick="sendEmoji('🔥')">🔥</button>
-        <button class="emoji-btn" onclick="sendEmoji('😂')">😂</button>
-        <button class="emoji-btn" onclick="sendEmoji('👏')">👏</button>
-        <button class="emoji-btn" onclick="sendEmoji('🚀')">🚀</button>
-        <button class="emoji-btn" onclick="sendEmoji('❤️')">❤️</button>
+        <p style="font-weight: bold; margin-bottom: 20px;">Thanks for playing!</p>
+        <div id="mobilePodiumList" style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); width: 80%; max-width: 300px;"></div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // Use empty io() to automatically connect to the current host domain
         const socket = io(); 
         
         let isJoined = false;
@@ -140,7 +154,7 @@
         let isPollActive = false;
         let liveQuestionStats = { A: 0, B: 0, C: 0, D: 0 };
         let latestPollVotes = { A: 0, B: 0, C: 0, D: 0 };
-        let allPlayerVotes = {}; 
+        let lastKnownState = null; 
 
         document.getElementById("joinBtn").onclick = () => {
             const myName = document.getElementById("playerName").value.trim();
@@ -151,14 +165,62 @@
             socket.emit('joinGame', myName);
             
             document.getElementById("loginScreen").style.display = "none";
-            document.getElementById("waitMsg").innerHTML = "You're in!<br><br>Waiting for host...";
-            document.getElementById("waitScreen").style.display = "flex";
-            document.getElementById("emojiTray").style.display = "flex"; 
+
+            if (lastKnownState && (lastKnownState.status === "active" || lastKnownState.status === "poll")) {
+                applyState(lastKnownState);
+            } else {
+                document.getElementById("waitMsg").innerHTML = "You're in!<br><br>Waiting for host...";
+                document.getElementById("waitScreen").style.display = "flex";
+            }
         };
 
-        window.sendEmoji = (emoji) => {
-            socket.emit('sendReaction', emoji);
-        };
+        // DOM Animation Logic for Leaderboard
+        function renderAnimatedLeaderboard(containerId, playersArray, myName) {
+            const container = document.getElementById(containerId);
+            const tileHeight = 75; // 65px tile + 10px gap
+            container.style.height = `${playersArray.length * tileHeight}px`;
+
+            const currentIds = playersArray.map(p => p.id);
+
+            // Remove disconnected players
+            Array.from(container.children).forEach(child => {
+                const childId = child.id.replace('player-tile-', '');
+                if (!currentIds.includes(childId)) {
+                    child.remove();
+                }
+            });
+
+            playersArray.forEach((p, index) => {
+                let tile = document.getElementById(`player-tile-${p.id}`);
+                
+                // Use emoji medals for Top 3
+                let rankHtml = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
+
+                if (!tile) {
+                    // Create Tile if it doesn't exist
+                    tile = document.createElement('div');
+                    tile.id = `player-tile-${p.id}`;
+                    tile.className = 'lb-tile';
+                    if (p.name === myName) tile.classList.add('my-tile');
+                    
+                    tile.innerHTML = `
+                        <div class="tile-left">
+                            <div class="rank-badge" id="rank-${p.id}">${rankHtml}</div>
+                            <div class="player-name">${p.name}</div>
+                        </div>
+                        <div class="player-score" id="score-${p.id}">${p.score} pts</div>
+                    `;
+                    container.appendChild(tile);
+                } else {
+                    // Update content if it already exists
+                    document.getElementById(`score-${p.id}`).innerText = `${p.score} pts`;
+                    document.getElementById(`rank-${p.id}`).innerText = rankHtml;
+                }
+                
+                // Animate to new position!
+                tile.style.top = `${index * tileHeight}px`;
+            });
+        }
 
         socket.on('playerListUpdate', (players) => {
             latestPlayers = players;
@@ -166,7 +228,11 @@
             const mRoom = document.getElementById("mobileWaitingRoom");
             mRoom.innerHTML = "";
             players.forEach((p) => mRoom.innerHTML += `<div class="mobile-badge">${p.name}</div>`);
-            if (document.getElementById("mobileLeaderboardScreen").style.display === "flex") renderLeaderboardList();
+            
+            // If we are looking at the leaderboard, animate the updates live!
+            if (document.getElementById("mobileLeaderboardScreen").style.display === "flex") {
+                renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers, myNameGlobal);
+            }
         });
 
         socket.on('questionStatsUpdate', (stats) => {
@@ -175,12 +241,7 @@
         });
 
         socket.on('pollResultsUpdate', (data) => {
-            if (typeof data === 'object' && data.votes) {
-                latestPollVotes = data.votes;
-                allPlayerVotes = data.playerChoices || {};
-            } else {
-                latestPollVotes = data;
-            }
+            latestPollVotes = typeof data === 'object' && data.votes ? data.votes : data;
 
             document.getElementById("resA").innerText = `${latestPollVotes.A} votes`;
             document.getElementById("resB").innerText = `${latestPollVotes.B} votes`;
@@ -188,7 +249,6 @@
             document.getElementById("resD").innerText = `${latestPollVotes.D} votes`;
 
             if (hasAnswered && isPollActive && currentTimeLeft > 0) updatePollWaitingScreen();
-            if (isPollActive && document.getElementById("mobilePollResultsScreen").style.display === "flex") renderPlayerChoicesList();
         });
 
         function updateLiveWaitingScreen() {
@@ -232,31 +292,6 @@
             `;
         }
 
-        function renderLeaderboardList() {
-            const lbList = document.getElementById("mobileLeaderboardList");
-            lbList.innerHTML = "";
-            latestPlayers.forEach((p, index) => {
-                let isMe = p.name === myNameGlobal ? 'style="color:#ffd700;"' : '';
-                let playerPts = typeof p.score === 'number' ? p.score : (parseInt(p.score) || 0);
-                lbList.innerHTML += `<div class="lb-row" ${isMe}><span>#${index + 1} ${p.name}</span><span style="font-weight:bold;">${playerPts} pts</span></div>`;
-            });
-        }
-
-        function renderPlayerChoicesList() {
-            let container = document.getElementById("playerChoicesContainer");
-            if (!container) {
-                container = document.createElement("div");
-                container.id = "playerChoicesContainer";
-                container.style.cssText = "margin-top: 10px; width: 100%; max-width: 400px; max-height: 120px; overflow-y: auto; text-align: left;";
-                document.getElementById("mobilePollResultsScreen").appendChild(container);
-            }
-            container.innerHTML = "<p style='font-size:13px; margin-bottom:4px; color:#ffd700;'>Player Answers:</p>";
-            for (let playerName in allPlayerVotes) {
-                let choice = allPlayerVotes[playerName];
-                container.innerHTML += `<div style="background:rgba(0,0,0,0.2); padding:4px 10px; margin:3px 0; border-radius:4px; font-size:13px; display:flex; justify-content:space-between;"><span>${playerName}</span><span style="font-weight:bold;">Option ${choice}</span></div>`;
-            }
-        }
-
         function revealCorrectAnswerOnPhone() {
             hasAnswered = true; 
             document.getElementById("waitScreen").style.display = "none";
@@ -293,7 +328,6 @@
             if (isPollActive) {
                 document.getElementById("pollChoiceEcho").innerText = myLastChoice ? `You voted for Option ${myLastChoice}` : "You didn't vote";
                 document.getElementById("mobilePollResultsScreen").style.display = "flex";
-                renderPlayerChoicesList(); 
             } else {
                 const lbScreen = document.getElementById("mobileLeaderboardScreen");
                 let statusText = "";
@@ -301,32 +335,32 @@
                 else if (myLastChoice !== "") { statusText = "Incorrect! Better luck next time."; lbScreen.style.backgroundColor = "#e21b3c"; } 
                 else { statusText = "Time's up! You didn't answer."; lbScreen.style.backgroundColor = "#46178f"; }
                 document.getElementById("myStatusMsg").innerText = statusText;
-                renderLeaderboardList();
+                
+                // Show the animated leaderboard instead of simple text
+                renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers, myNameGlobal);
                 lbScreen.style.display = "flex";
             }
         }
 
-        socket.on('gameStateUpdate', (state) => {
-            if (!isJoined) {
-                if (state.status === "waiting" || !state.status) { document.getElementById("lockedScreen").style.display = "none"; document.getElementById("loginScreen").style.display = "flex"; } 
-                else { document.getElementById("loginScreen").style.display = "none"; document.getElementById("lockedScreen").style.display = "flex"; }
-                return; 
-            }
-            
+        function applyState(state) {
             if (state.status === "active" || state.status === "poll") {
-                hasAnswered = false; myLastChoice = ""; pointsEarned = 0; currentAnswer = state.correctAnswer; isPollActive = (state.correctAnswer === "NONE");
-                
                 ['A', 'B', 'C', 'D'].forEach(opt => {
                     const btn = document.getElementById(opt);
                     btn.style.opacity = '1';
                     btn.style.boxShadow = '0 4px 0 rgba(0,0,0,0.2)';
                     btn.style.transform = 'scale(1)';
+                    const textSpan = document.getElementById(`text${opt}`);
+                    textSpan.innerText = textSpan.innerText.replace(" ✔️", "");
                 });
 
+                hasAnswered = false; myLastChoice = ""; pointsEarned = 0; currentAnswer = state.correctAnswer; isPollActive = (state.correctAnswer === "NONE");
+                
                 document.getElementById("waitScreen").style.display = "none";
                 document.getElementById("mobileLeaderboardScreen").style.display = "none"; 
                 document.getElementById("mobilePollResultsScreen").style.display = "none";
                 document.getElementById("mobilePodiumScreen").style.display = "none"; 
+                document.getElementById("loginScreen").style.display = "none";
+                
                 document.getElementById("mobileQuestionText").innerText = state.questionText;
                 document.getElementById("textA").innerText = state.ansA; document.getElementById("textB").innerText = state.ansB;
                 document.getElementById("textC").innerText = state.ansC; document.getElementById("textD").innerText = state.ansD;
@@ -334,10 +368,12 @@
                 
                 let timeLeft = state.timer || 15; totalTimeLimit = timeLeft; currentTimeLeft = timeLeft;
                 document.getElementById("timerBadge").innerText = timeLeft;
+                
                 clearInterval(timerInterval);
                 timerInterval = setInterval(() => {
-                    timeLeft--; currentTimeLeft = timeLeft; document.getElementById("timerBadge").innerText = timeLeft;
-                    if (timeLeft <= 0) { 
+                    currentTimeLeft--; 
+                    document.getElementById("timerBadge").innerText = currentTimeLeft;
+                    if (currentTimeLeft <= 0) { 
                         clearInterval(timerInterval); 
                         revealCorrectAnswerOnPhone(); 
                     }
@@ -346,16 +382,16 @@
                 clearInterval(timerInterval); showResultsOnPhone();
             } else if (state.status === "podium") {
                 clearInterval(timerInterval);
-                document.getElementById("playScreen").style.display = "none"; document.getElementById("mobileLeaderboardScreen").style.display = "none"; document.getElementById("mobilePollResultsScreen").style.display = "none"; document.getElementById("waitScreen").style.display = "none";
-                const pList = document.getElementById("mobilePodiumList"); pList.innerHTML = "";
-                latestPlayers.slice(0, 3).forEach((p, index) => {
-                    let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉";
-                    let playerPts = typeof p.score === 'number' ? p.score : (parseInt(p.score) || 0);
-                    pList.innerHTML += `<div class="podium-row"><span style="font-weight:bold;">${medal} ${p.name}</span><span style="color: #46178f; font-weight:bold;">${playerPts} pts</span></div>`;
-                });
+                document.getElementById("playScreen").style.display = "none"; 
+                document.getElementById("mobileLeaderboardScreen").style.display = "none"; 
+                document.getElementById("mobilePollResultsScreen").style.display = "none"; 
+                document.getElementById("waitScreen").style.display = "none";
+                
+                const pList = document.getElementById("mobilePodiumList"); 
+                pList.innerHTML = `<div style="font-size: 26px; color: #46178f;">Total Participants: <br><span style="font-size: 40px; color: #26890c;">${latestPlayers.length}</span></div>`;
+                
                 document.getElementById("mobilePodiumScreen").style.display = "flex";
                 isJoined = false; 
-                document.getElementById("emojiTray").style.display = "none";
             } else if (state.status === "waiting") {
                 clearInterval(timerInterval);
                 document.getElementById("playScreen").style.display = "none"; document.getElementById("mobileLeaderboardScreen").style.display = "none"; document.getElementById("mobilePollResultsScreen").style.display = "none"; document.getElementById("mobilePodiumScreen").style.display = "none";
@@ -363,8 +399,16 @@
                 document.getElementById("waitMsg").innerHTML = "Get Ready!<br><br>Game starting soon...";
                 document.getElementById("mobileLobby").style.display = "flex"; document.getElementById("waitScreen").style.display = "flex";
                 isJoined = false;
-                document.getElementById("emojiTray").style.display = "none";
             }
+        }
+
+        socket.on('gameStateUpdate', (state) => {
+            lastKnownState = state;
+            if (!isJoined) {
+                document.getElementById("loginScreen").style.display = "flex"; 
+                return; 
+            }
+            applyState(state);
         });
 
         window.submitAnswer = (choice) => {
@@ -372,6 +416,7 @@
             hasAnswered = true; myLastChoice = choice;
             document.getElementById("playScreen").style.display = "none";
             document.getElementById("waitScreen").style.backgroundColor = "#333";
+            
             if (isPollActive) {
                 updatePollWaitingScreen();
                 socket.emit('submitAnswer', { pointsEarned: 0, choice: choice, isPoll: true });
@@ -382,16 +427,6 @@
             }
             document.getElementById("waitScreen").style.display = "flex";
         };
-
-        socket.on('showReaction', (emoji) => {
-            const el = document.createElement('div');
-            el.className = 'floating-emoji';
-            el.innerText = emoji;
-            el.style.left = `${Math.floor(Math.random() * 80) + 10}%`;
-            el.style.animationDuration = (Math.random() * 1.5 + 2) + 's';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 3500);
-        });
     </script>
 </body>
 </html>
