@@ -35,8 +35,6 @@
         
         #mobileLobby { display: none; flex-direction: column; align-items: center; width: 100%; margin-top: 20px; }
         #mobileCounter { background: #26890c; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-bottom: 15px;}
-        #mobileWaitingRoom { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 90%; max-height: 180px; overflow-y: auto;}
-        .mobile-badge { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 15px; font-size: 14px; font-weight: bold;}
 
         /* --- ANIMATED LEADERBOARD TILES --- */
         #mobileLeaderboardList { position: relative; width: 100%; max-width: 500px; margin: 0 auto; transition: height 0.3s ease; }
@@ -63,7 +61,6 @@
         <div id="waitMsg"></div>
         <div id="mobileLobby">
             <div id="mobileCounter">Players Joined: 0</div>
-            <div id="mobileWaitingRoom"></div>
         </div>
     </div>
 
@@ -182,9 +179,6 @@
         socket.on('playerListUpdate', (players) => {
             latestPlayers = players;
             document.getElementById("mobileCounter").innerText = `Players Joined: ${players.length}`;
-            const mRoom = document.getElementById("mobileWaitingRoom");
-            mRoom.innerHTML = "";
-            players.forEach((p) => mRoom.innerHTML += `<div class="mobile-badge">${p.name}</div>`);
             
             if (document.getElementById("mobileLeaderboardScreen").style.display === "flex") {
                 renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers, myNameGlobal);
@@ -376,8 +370,7 @@
 
                 pList.innerHTML = podiumHtml;
                 document.getElementById("mobilePodiumScreen").style.display = "flex";
-                
-                // NO LONGER SETTING isJoined = false HERE
+                isJoined = false; 
             } else if (state.status === "waiting") {
                 clearInterval(timerInterval);
                 document.getElementById("playScreen").style.display = "none"; document.getElementById("mobileLeaderboardScreen").style.display = "none"; document.getElementById("mobilePollResultsScreen").style.display = "none"; document.getElementById("mobilePodiumScreen").style.display = "none";
@@ -386,8 +379,7 @@
                 document.getElementById("waitMsg").innerHTML = "Game starting soon...";
                 document.getElementById("waitTimerDisplay").style.display = "none";
                 document.getElementById("mobileLobby").style.display = "flex"; document.getElementById("waitScreen").style.display = "flex";
-                
-                // NO LONGER SETTING isJoined = false HERE
+                isJoined = false;
             }
         }
 
