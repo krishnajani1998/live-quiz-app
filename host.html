@@ -18,6 +18,44 @@
         
         select { padding: 10px; font-size: 16px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; }
 
+        /* --- NEW DESIGNER JOIN BANNER --- */
+        .join-banner {
+            background: linear-gradient(135deg, #46178f, #2b0c5e);
+            color: white;
+            border-radius: 16px;
+            padding: 25px 45px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+            text-align: left;
+            max-width: 900px;
+        }
+        .join-text h3 { margin: 0 0 10px 0; font-size: 32px; color: #ffd700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .join-text p { margin: 0 0 15px 0; font-size: 20px; font-weight: bold; opacity: 0.9; }
+        .join-url { 
+            background: rgba(255,255,255,0.15); 
+            padding: 12px 25px; 
+            border-radius: 8px; 
+            font-size: 26px; 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+            display: inline-block;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .join-qr { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4); 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .join-qr span { color: #46178f; font-weight: bold; font-size: 14px; margin-top: 8px; }
+
         #qDisplay { font-size: 36px; font-weight: bold; margin: 20px auto; color: #333; min-height: 80px; background: rgba(255,255,255,0.9); padding: 20px 40px; border-radius: 12px; display: inline-block; max-width: 90%;}
         
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 900px; margin: 0 auto; display: none; }
@@ -31,36 +69,9 @@
         /* --- BEAUTIFUL ANIMATED LEADERBOARD TILES --- */
         .leaderboard { background: transparent; padding: 20px 0; max-width: 700px; margin: 20px auto; display: none; }
         #hostLeaderboardList { position: relative; width: 100%; transition: height 0.3s ease; }
-        .lb-tile {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            color: #333;
-            border-radius: 12px;
-            padding: 0 25px;
-            box-sizing: border-box;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+        .lb-tile { position: absolute; left: 0; width: 100%; height: 70px; transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; justify-content: space-between; align-items: center; background: white; color: #333; border-radius: 12px; padding: 0 25px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .tile-left { display: flex; align-items: center; gap: 15px; }
-        .rank-badge {
-            background: #f2f2f2;
-            color: #333;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
+        .rank-badge { background: #f2f2f2; color: #333; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .player-name { font-size: 24px; font-weight: bold; }
         .player-score { font-size: 24px; font-weight: bold; color: #46178f; }
 
@@ -77,19 +88,11 @@
         #playerCounter { font-size: 22px; font-weight: bold; background: #26890c; color: white; padding: 10px 25px; border-radius: 30px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.2); margin-top: -10px; margin-bottom: 15px; }
         
         .waiting-room { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 1000px; margin: 0 auto 20px; min-height: 60px; }
-        .name-badge { 
-            background: #46178f; color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 18px; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2); animation: badgePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0);
-        }
-        @keyframes badgePop { 
-            0% { transform: scale(0); opacity: 0; } 
-            70% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; } 
-        }
+        .name-badge { background: #46178f; color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); animation: badgePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
+        @keyframes badgePop { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
         .name-badge.leaving { animation: badgeFade 0.3s ease-in forwards; }
         @keyframes badgeFade { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
 
-        /* Print Styles for QR Modal */
         @media print {
             body * { visibility: hidden; }
             #qrModal, #qrModal * { visibility: visible; }
@@ -102,7 +105,7 @@
     <div class="header-bar">
         <h2 style="margin:0; color:#333;">Host Control</h2>
         <div class="btn-group">
-            <button class="btn" id="qrBtn" onclick="openQrModal()">Show QR Code 📱</button>
+            <button class="btn" id="qrBtn" onclick="openQrModal()">Show Large QR 🖨️</button>
             <select id="modeSelector" onchange="changeQuizMode()">
                 <option value="main">Main Quiz (11 Qs, No Poll)</option>
                 <option value="trial">Trial Quiz (2 Qs, No Poll)</option>
@@ -113,7 +116,20 @@
         </div>
     </div>
 
-    <!-- QR Code Modal Popup -->
+    <!-- Designer Stage Banner -->
+    <div class="join-banner">
+        <div class="join-text">
+            <h3>Ready to Play?</h3>
+            <p>Take out your phone and scan to join!</p>
+            <div class="join-url" id="displayUrl">Loading URL...</div>
+        </div>
+        <div class="join-qr">
+            <canvas id="qrCodeCanvas"></canvas>
+            <span>Point camera here</span>
+        </div>
+    </div>
+
+    <!-- Print Modal -->
     <div id="qrModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center;">
         <div style="background:white; padding:40px; border-radius:12px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.3); max-width:420px; width:90%;">
             <h2 style="margin-top:0; color:#333; font-size:28px;">Scan to Join Quiz! 📱</h2>
@@ -122,17 +138,12 @@
             </div>
             <p id="qrUrlText" style="font-size:15px; font-weight:bold; color:#46178f; word-break:break-all; margin-bottom:25px;"></p>
             <div style="display:flex; gap:12px; justify-content:center;" class="print-hide">
-                <button class="btn" onclick="window.print()" style="background:#26890c;">Print QR 🖨️</button>
-                <button class="btn" onclick="closeQrModal()" style="background:#e21b3c;">Close ✕</button>
+                <button class="btn" onclick="window.print()" style="background:#26890c;">Print QR</button>
+                <button class="btn" onclick="closeQrModal()" style="background:#e21b3c;">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Inline QR Code Join Box -->
-    <div style="background: white; padding: 10px 15px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px;">
-        <canvas id="qrCodeCanvas"></canvas>
-        <div style="font-size: 14px; font-weight: bold; color: #333; margin-top: 5px;">Scan to Join! 📱</div>
-    </div>
     <br>
 
     <div id="playerCounter">Players Joined: 0</div>
@@ -158,7 +169,6 @@
         </div>
     </div>
 
-    <!-- Animated Host Leaderboard Container -->
     <div class="leaderboard" id="leaderboard">
         <div id="hostLeaderboardList"></div>
     </div>
@@ -174,11 +184,29 @@
         const socket = io(); 
 
         window.addEventListener('DOMContentLoaded', () => {
-            const playerUrl = window.location.origin + "/index.html"; 
-            document.getElementById('qrUrlText').innerText = playerUrl;
+            let hostUrl = window.location.origin;
+            const playerUrl = hostUrl + "/index.html"; 
             
-            new QRious({ element: document.getElementById('qrCodeCanvasModal'), value: playerUrl, size: 240 });
-            new QRious({ element: document.getElementById('qrCodeCanvas'), value: playerUrl, size: 130 });
+            // Clean up the URL for the display banner so it's easy to read
+            let cleanUrl = playerUrl.replace(/^https?:\/\//, '');
+            document.getElementById('displayUrl').innerText = cleanUrl;
+            document.getElementById('qrUrlText').innerText = cleanUrl;
+            
+            // Generate Premium Tinted QR Codes
+            new QRious({ 
+                element: document.getElementById('qrCodeCanvasModal'), 
+                value: playerUrl, 
+                size: 260,
+                foreground: '#46178f', // Brand purple
+                level: 'H' // High error correction
+            });
+            new QRious({ 
+                element: document.getElementById('qrCodeCanvas'), 
+                value: playerUrl, 
+                size: 150,
+                foreground: '#46178f',
+                level: 'H'
+            });
         });
 
         function openQrModal() { document.getElementById('qrModal').style.display = 'flex'; }
@@ -194,7 +222,6 @@
             { q: "Q. દામોદર કુંડ ગિરનારના કયા ભાગમાં આવેલો છે?", a: "શિખર પર", b: "તળેટીમાં", c: "મધ્ય ભાગમાં", d: "ભવનાથથી ઉપર", correct: "B", time: 15 }
         ];
 
-        // POLL REMOVED FROM MAIN DATASET
         const mainQuizQuestions = [
             { q: "Q 1). ગિરનારનું બીજું પ્રાચીન નામ કયું છે?", a: "રેવતક પર્વત", b: "ગિરિકૂટ", c: "સુવર્ણ પર્વત", d: "દ્રોણગિરિ", correct: "A", time: 15 },
             { q: "Q2). દામોદર કુંડ કઈ પવિત્ર નદીના પ્રવાહ માર્ગમાં આવેલો છે?", a: "ભાદર નદી", b: "સ્વર્ણરેખા (સોનરખ) નદી", c: "સરસ્વતી નદી", d: "હિરણ નદી", correct: "B", time: 15 },
@@ -206,7 +233,7 @@
             { q: "Q8). ગિરિ નારાયણ બ્રાહ્મણોની ઉત્પત્તિની પરંપરામાં નારદ કોને ગિરનાર વિસ્તારમાં લાવ્યા હોવાનું કહેવાય છે?", a: "ઉત્તર ભારતના બ્રાહ્મણો", b: "હિમાલયની તળેટીના ઋષિઓ", c: "દક્ષિણ ભારતના બ્રાહ્મણો", d: "કાશીના પંડિતો", correct: "B", time: 15 },
             { q: "Q9) કયા પુરાણમાં ગિરિનારાયણ બ્રાહ્મણોનો ઉલ્લેખ જોવા મળે છે?", a: "સ્કંદ પુરાણ", b: "વિષ્ણુ પુરાણ", c: "બ્રહ્મ પુરાણ", d: "નારદ પુરાણ", correct: "A", time: 15 },
             { q: "Q 10) . ગિરનાર મહાત્મ્યની પરંપરા અનુસાર ગિરિનારાયણ વિપ્રોને વસ્ત્રાપથમાં વસાવવામાં કોનું નામ આવે છે?", a: "રાજા ભોજ", b: "રાજા ચંદ્રકેતુ", c: "રાજા સિદ્ધરાજ", d: "રાજા કુમારપાળ", correct: "B", time: 15 },
-            { q: "Q11) ગિરિનારાયણ બ્રાહ્મણોના મૂળ કઈ પ્રાચિન આર્ય બ્રાહ્મણ સંસ્થામાં મળી આવે છે?", a: "પંચ ગૌડ", b: "સારસ્વત ગૌડ તથા મૈથિલ ગૌડ", c: "સૌરાષ્ટ્ર દ્રવિડ તથા ગુર્જર ગૌડ", d: "પંચ દ્રવિડ", correct: "C", time: 15 }[cite: 1]
+            { q: "Q11) ગિરિનારાયણ બ્રાહ્મણોના મૂળ કઈ પ્રાચિન આર્ય બ્રાહ્મણ સંસ્થામાં મળી આવે છે?", a: "પંચ ગૌડ", b: "સારસ્વત ગૌડ તથા મૈથિલ ગૌડ", c: "સૌરાષ્ટ્ર દ્રવિડ તથા ગુર્જર ગૌડ", d: "પંચ દ્રવિડ", correct: "C", time: 15 }
         ];
 
         let quizQuestions = mainQuizQuestions;
@@ -271,6 +298,7 @@
                 document.getElementById("nextBtn").style.display = "none"; 
                 document.getElementById("leaderboardBtn").style.display = "none"; 
                 document.getElementById("playerCounter").style.display = "none"; 
+                document.querySelector(".join-banner").style.display = "none";
                 
                 if(finalWinners[0]) { 
                     let s1 = typeof finalWinners[0].score === 'number' ? finalWinners[0].score : 0;
@@ -303,6 +331,7 @@
             document.getElementById("podium").style.display = "none";
             document.getElementById("optionsGrid").style.display = "grid";
             document.getElementById("waitingRoom").style.display = "none"; 
+            document.querySelector(".join-banner").style.display = "none"; // Hide banner during active play
             
             let qTime = parseInt(currentQ.time) || 15;
             let questionStatus = isCurrentPoll ? "poll" : "active";
@@ -340,6 +369,7 @@
                 document.getElementById("leaderboardBtn").style.display = "inline-block";
                 document.getElementById("playerCounter").style.display = "inline-block";
                 document.getElementById("waitingRoom").style.display = "flex"; 
+                document.querySelector(".join-banner").style.display = "inline-flex"; 
                 document.getElementById("optionsGrid").style.display = "none";
                 document.getElementById("leaderboard").style.display = "none";
                 document.getElementById("podium").style.display = "none";
@@ -347,7 +377,6 @@
             }
         };
 
-        socket.on('pollResultsUpdate', (data) => updateHostStats(typeof data === 'object' && data.votes ? data.votes : data));
         socket.on('questionStatsUpdate', (stats) => { if (!isCurrentPoll) updateHostStats(stats); });
 
         function updateHostStats(votes) {
@@ -366,7 +395,7 @@
         // DOM Animation Logic for Host Leaderboard
         function renderAnimatedLeaderboard(containerId, playersArray) {
             const container = document.getElementById(containerId);
-            const tileHeight = 85; // 70px tile + 15px gap
+            const tileHeight = 85; 
             container.style.height = `${playersArray.length * tileHeight}px`;
 
             const currentIds = playersArray.map(p => p.id);
@@ -428,7 +457,6 @@
                 }
             });
 
-            // Animate Leaderboard on the Host Screen
             if (document.getElementById("leaderboard").style.display === "block") {
                 renderAnimatedLeaderboard('hostLeaderboardList', players);
             }
