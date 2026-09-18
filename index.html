@@ -328,6 +328,11 @@
                     currentTimeLeft--; 
                     if (currentTimeLeft >= 0) {
                         document.getElementById("timerBadge").innerText = currentTimeLeft;
+                        // Also update the waiting screen timer badge if locked in
+                        const waitBadge = document.getElementById("waitTimerDisplay");
+                        if (waitBadge && waitBadge.style.display !== "none") {
+                            waitBadge.innerText = currentTimeLeft;
+                        }
                     }
                     if (currentTimeLeft <= 0) { 
                         clearInterval(timerInterval); 
@@ -401,7 +406,9 @@
             document.getElementById("waitScreen").style.backgroundColor = "#333";
             
             document.getElementById("waitTitle").innerHTML = `Answer Locked! (${choice}) 🔒`;
-            document.getElementById("waitTimerDisplay").style.display = "inline-block"; 
+            const waitTimerEl = document.getElementById("waitTimerDisplay");
+            waitTimerEl.innerText = currentTimeLeft;
+            waitTimerEl.style.display = "inline-block"; 
             document.getElementById("waitMsg").innerHTML = "";
 
             if (isPollActive) {
