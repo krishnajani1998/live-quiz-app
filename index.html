@@ -370,7 +370,6 @@
 
                 pList.innerHTML = podiumHtml;
                 document.getElementById("mobilePodiumScreen").style.display = "flex";
-                isJoined = false; 
             } else if (state.status === "waiting") {
                 clearInterval(timerInterval);
                 document.getElementById("playScreen").style.display = "none"; document.getElementById("mobileLeaderboardScreen").style.display = "none"; document.getElementById("mobilePollResultsScreen").style.display = "none"; document.getElementById("mobilePodiumScreen").style.display = "none";
@@ -379,7 +378,6 @@
                 document.getElementById("waitMsg").innerHTML = "Game starting soon...";
                 document.getElementById("waitTimerDisplay").style.display = "none";
                 document.getElementById("mobileLobby").style.display = "flex"; document.getElementById("waitScreen").style.display = "flex";
-                isJoined = false;
             }
         }
 
