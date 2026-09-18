@@ -1,0 +1,25 @@
+config:
+  target: "https://live-quiz-app-0qi6.onrender.com"
+  phases:
+    - duration: 30
+      arrivalRate: 3
+      rampTo: 15
+      name: "Ramp up to 300 concurrent players"
+  engines:
+    socketio:
+      transports: ["websocket"]
+scenarios:
+  - name: "Player Join and Answer"
+    engine: "socketio"
+    flow:
+      - emit:
+          channel: "joinGame"
+          data: "User-{{ $uuid }}"
+      - think: 5
+      - emit:
+          channel: "submitAnswer"
+          data:
+            pointsEarned: 850
+            choice: "B"
+            isPoll: false
+      - think: 10
