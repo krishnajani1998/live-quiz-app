@@ -29,7 +29,7 @@
         
         #mobileLeaderboardScreen { display: none; background: #333; height: 100vh; color: white; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-x: hidden; overflow-y: auto;}
         #mobilePollResultsScreen { display: none; background: #1368ce; height: 100vh; color: white; flex-direction: column; padding: 20px; box-sizing: border-box; justify-content: center; align-items: center;}
-        #mobilePodiumScreen { display: none; background: #ffd700; height: 100vh; color: #333; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;}
+        #mobilePodiumScreen { display: none; background: #ffd700; height: 100vh; color: #333; flex-direction: column; align-items: center; justify-content: flex-start; padding: 30px 20px; box-sizing: border-box; overflow-y: auto;}
         
         .poll-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 12px; margin: 6px 0; border-radius: 8px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; box-sizing: border-box;}
         
@@ -38,45 +38,12 @@
         #mobileWaitingRoom { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 90%; max-height: 180px; overflow-y: auto;}
         .mobile-badge { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 15px; font-size: 14px; font-weight: bold;}
 
-        /* --- BEAUTIFUL ANIMATED LEADERBOARD TILES --- */
+        /* --- ANIMATED LEADERBOARD TILES --- */
         #mobileLeaderboardList { position: relative; width: 100%; max-width: 500px; margin: 0 auto; transition: height 0.3s ease; }
-        .lb-tile {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 65px;
-            transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy sliding animation */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            color: #333;
-            border-radius: 12px;
-            padding: 0 15px;
-            box-sizing: border-box;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .lb-tile.my-tile {
-            background: linear-gradient(135deg, #46178f, #2b0c5e);
-            color: white;
-            border: 2px solid #ffd700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-            z-index: 10;
-        }
+        .lb-tile { position: absolute; left: 0; width: 100%; height: 65px; transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; justify-content: space-between; align-items: center; background: white; color: #333; border-radius: 12px; padding: 0 15px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .lb-tile.my-tile { background: linear-gradient(135deg, #46178f, #2b0c5e); color: white; border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); z-index: 10; }
         .tile-left { display: flex; align-items: center; gap: 12px; }
-        .rank-badge {
-            background: #f2f2f2;
-            color: #333;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
+        .rank-badge { background: #f2f2f2; color: #333; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .my-tile .rank-badge { background: #ffd700; color: #46178f; }
         .player-name { font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; text-align: left; }
         .player-score { font-size: 18px; font-weight: bold; opacity: 0.9; }
@@ -90,12 +57,10 @@
         <button class="btn" id="joinBtn">Enter</button>
     </div>
 
-    <div id="lockedScreen" style="display:none; background: #333;">
-        <h2>Game in Progress 🔒</h2>
-    </div>
-
     <div id="waitScreen" style="display:none;">
-        <h2 id="waitMsg" style="margin-bottom: 10px;">Connecting...</h2>
+        <h2 id="waitTitle" style="margin-bottom: 5px;">Connecting...</h2>
+        <div id="waitTimerDisplay" style="font-size: 45px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 5px 30px; border-radius: 30px; margin: 15px 0; display: none;">15</div>
+        <div id="waitMsg"></div>
         <div id="mobileLobby">
             <div id="mobileCounter">Players Joined: 0</div>
             <div id="mobileWaitingRoom"></div>
@@ -127,14 +92,13 @@
     <div id="mobileLeaderboardScreen">
         <h2 style="margin-bottom: 10px;">Live Rankings</h2>
         <h3 id="myStatusMsg" style="color: #ffd700; margin-bottom: 20px; font-size: 20px;"></h3>
-        <!-- This is where the animated sliding tiles live -->
         <div id="mobileLeaderboardList"></div>
     </div>
 
     <div id="mobilePodiumScreen">
         <h1 style="font-size: 35px; margin-bottom: 10px;">🏆 Quiz Finished! 🏆</h1>
         <p style="font-weight: bold; margin-bottom: 20px;">Thanks for playing!</p>
-        <div id="mobilePodiumList" style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); width: 80%; max-width: 300px;"></div>
+        <div id="mobilePodiumList" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -169,20 +133,19 @@
             if (lastKnownState && (lastKnownState.status === "active" || lastKnownState.status === "poll")) {
                 applyState(lastKnownState);
             } else {
-                document.getElementById("waitMsg").innerHTML = "You're in!<br><br>Waiting for host...";
+                document.getElementById("waitTitle").innerHTML = "You're in!";
+                document.getElementById("waitMsg").innerHTML = "<br>Waiting for host...";
                 document.getElementById("waitScreen").style.display = "flex";
             }
         };
 
-        // DOM Animation Logic for Leaderboard
         function renderAnimatedLeaderboard(containerId, playersArray, myName) {
             const container = document.getElementById(containerId);
-            const tileHeight = 75; // 65px tile + 10px gap
+            const tileHeight = 75; 
             container.style.height = `${playersArray.length * tileHeight}px`;
 
             const currentIds = playersArray.map(p => p.id);
 
-            // Remove disconnected players
             Array.from(container.children).forEach(child => {
                 const childId = child.id.replace('player-tile-', '');
                 if (!currentIds.includes(childId)) {
@@ -192,12 +155,9 @@
 
             playersArray.forEach((p, index) => {
                 let tile = document.getElementById(`player-tile-${p.id}`);
-                
-                // Use emoji medals for Top 3
                 let rankHtml = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
 
                 if (!tile) {
-                    // Create Tile if it doesn't exist
                     tile = document.createElement('div');
                     tile.id = `player-tile-${p.id}`;
                     tile.className = 'lb-tile';
@@ -212,12 +172,9 @@
                     `;
                     container.appendChild(tile);
                 } else {
-                    // Update content if it already exists
                     document.getElementById(`score-${p.id}`).innerText = `${p.score} pts`;
                     document.getElementById(`rank-${p.id}`).innerText = rankHtml;
                 }
-                
-                // Animate to new position!
                 tile.style.top = `${index * tileHeight}px`;
             });
         }
@@ -229,7 +186,6 @@
             mRoom.innerHTML = "";
             players.forEach((p) => mRoom.innerHTML += `<div class="mobile-badge">${p.name}</div>`);
             
-            // If we are looking at the leaderboard, animate the updates live!
             if (document.getElementById("mobileLeaderboardScreen").style.display === "flex") {
                 renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers, myNameGlobal);
             }
@@ -242,12 +198,6 @@
 
         socket.on('pollResultsUpdate', (data) => {
             latestPollVotes = typeof data === 'object' && data.votes ? data.votes : data;
-
-            document.getElementById("resA").innerText = `${latestPollVotes.A} votes`;
-            document.getElementById("resB").innerText = `${latestPollVotes.B} votes`;
-            document.getElementById("resC").innerText = `${latestPollVotes.C} votes`;
-            document.getElementById("resD").innerText = `${latestPollVotes.D} votes`;
-
             if (hasAnswered && isPollActive && currentTimeLeft > 0) updatePollWaitingScreen();
         });
 
@@ -261,7 +211,6 @@
             let pD = totalVotes > 0 ? (liveQuestionStats.D / totalVotes) * 100 : 0;
 
             document.getElementById("waitMsg").innerHTML = `
-                Answer submitted! (${myLastChoice}) 🕒<br><br>
                 <span style="font-size:15px; color:#ffd700; font-weight:bold;">Live Peer Breakdown:</span><br>
                 <div style="width: 280px; margin: 10px auto; text-align: left; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px;">
                     <div style="margin-bottom: 8px;"><div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 2px;"><span>▲ Option A</span><span>${liveQuestionStats.A} votes</span></div><div style="background: rgba(255,255,255,0.2); border-radius: 4px; height: 10px; overflow: hidden;"><div style="background: #e21b3c; width: ${pA}%; height: 100%; transition: width 0.3s;"></div></div></div>
@@ -281,7 +230,6 @@
             let pD = totalVotes > 0 ? (latestPollVotes.D / totalVotes) * 100 : 0;
 
             document.getElementById("waitMsg").innerHTML = `
-                Poll vote recorded! (${myLastChoice}) 📊<br><br>
                 <span style="font-size:15px; color:#ffd700; font-weight:bold;">Live Poll Breakdown:</span><br>
                 <div style="width: 280px; margin: 10px auto; text-align: left; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px;">
                     <div style="margin-bottom: 6px;"><div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 2px;"><span>▲ Option A</span><span>${latestPollVotes.A} votes</span></div><div style="background: rgba(255,255,255,0.2); border-radius: 4px; height: 8px; overflow: hidden;"><div style="background: #e21b3c; width: ${pA}%; height: 100%; transition: width 0.3s;"></div></div></div>
@@ -294,6 +242,7 @@
 
         function revealCorrectAnswerOnPhone() {
             hasAnswered = true; 
+            document.getElementById("waitTimerDisplay").style.display = "none";
             document.getElementById("waitScreen").style.display = "none";
             document.getElementById("playScreen").style.display = "flex";
             
@@ -327,6 +276,10 @@
 
             if (isPollActive) {
                 document.getElementById("pollChoiceEcho").innerText = myLastChoice ? `You voted for Option ${myLastChoice}` : "You didn't vote";
+                document.getElementById("resA").innerText = `${latestPollVotes.A} votes`;
+                document.getElementById("resB").innerText = `${latestPollVotes.B} votes`;
+                document.getElementById("resC").innerText = `${latestPollVotes.C} votes`;
+                document.getElementById("resD").innerText = `${latestPollVotes.D} votes`;
                 document.getElementById("mobilePollResultsScreen").style.display = "flex";
             } else {
                 const lbScreen = document.getElementById("mobileLeaderboardScreen");
@@ -336,7 +289,6 @@
                 else { statusText = "Time's up! You didn't answer."; lbScreen.style.backgroundColor = "#46178f"; }
                 document.getElementById("myStatusMsg").innerText = statusText;
                 
-                // Show the animated leaderboard instead of simple text
                 renderAnimatedLeaderboard('mobileLeaderboardList', latestPlayers, myNameGlobal);
                 lbScreen.style.display = "flex";
             }
@@ -368,11 +320,13 @@
                 
                 let timeLeft = state.timer || 15; totalTimeLimit = timeLeft; currentTimeLeft = timeLeft;
                 document.getElementById("timerBadge").innerText = timeLeft;
+                document.getElementById("waitTimerDisplay").innerText = timeLeft;
                 
                 clearInterval(timerInterval);
                 timerInterval = setInterval(() => {
                     currentTimeLeft--; 
                     document.getElementById("timerBadge").innerText = currentTimeLeft;
+                    document.getElementById("waitTimerDisplay").innerText = currentTimeLeft;
                     if (currentTimeLeft <= 0) { 
                         clearInterval(timerInterval); 
                         revealCorrectAnswerOnPhone(); 
@@ -388,17 +342,52 @@
                 document.getElementById("waitScreen").style.display = "none";
                 
                 const pList = document.getElementById("mobilePodiumList"); 
-                pList.innerHTML = `<div style="font-size: 26px; color: #46178f;">Total Participants: <br><span style="font-size: 40px; color: #26890c;">${latestPlayers.length}</span></div>`;
-                
+                let podiumHtml = `<div style="font-size: 22px; color: #46178f; font-weight: bold; margin-bottom: 20px; background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">Total Participants: <span style="font-size: 28px; color: #26890c;">${latestPlayers.length}</span></div>`;
+
+                latestPlayers.slice(0, 5).forEach((p, index) => {
+                    let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
+                    let isMe = p.name === myNameGlobal;
+                    let myBg = isMe ? 'background: linear-gradient(135deg, #46178f, #2b0c5e); color: white; border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);' : 'background: white; color: #333; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid transparent;';
+                    let badgeBg = isMe ? 'background: #ffd700; color: #46178f;' : 'background: #f2f2f2; color: #333; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);';
+                    
+                    podiumHtml += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-radius: 12px; padding: 12px 20px; margin-bottom: 10px; ${myBg}">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; ${badgeBg}">${medal}</div>
+                            <div style="font-size: 20px; font-weight: bold; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                        </div>
+                        <div style="font-size: 20px; font-weight: bold;">${p.score}</div>
+                    </div>`;
+                });
+
+                let myRankIndex = latestPlayers.findIndex(p => p.name === myNameGlobal);
+                if (myRankIndex >= 5) {
+                    let p = latestPlayers[myRankIndex];
+                    podiumHtml += `<div style="text-align: center; font-weight: bold; margin: 10px 0; color: #46178f; font-size: 24px;">...</div>`;
+                    podiumHtml += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-radius: 12px; padding: 12px 20px; margin-bottom: 10px; background: linear-gradient(135deg, #46178f, #2b0c5e); color: white; border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; background: #ffd700; color: #46178f;">${myRankIndex + 1}</div>
+                            <div style="font-size: 20px; font-weight: bold; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                        </div>
+                        <div style="font-size: 20px; font-weight: bold;">${p.score}</div>
+                    </div>`;
+                }
+
+                pList.innerHTML = podiumHtml;
                 document.getElementById("mobilePodiumScreen").style.display = "flex";
-                isJoined = false; 
+                
+                // NO LONGER SETTING isJoined = false HERE
             } else if (state.status === "waiting") {
                 clearInterval(timerInterval);
                 document.getElementById("playScreen").style.display = "none"; document.getElementById("mobileLeaderboardScreen").style.display = "none"; document.getElementById("mobilePollResultsScreen").style.display = "none"; document.getElementById("mobilePodiumScreen").style.display = "none";
                 document.getElementById("waitScreen").style.backgroundColor = "#46178f"; 
-                document.getElementById("waitMsg").innerHTML = "Get Ready!<br><br>Game starting soon...";
+                document.getElementById("waitTitle").innerHTML = "Get Ready!";
+                document.getElementById("waitMsg").innerHTML = "Game starting soon...";
+                document.getElementById("waitTimerDisplay").style.display = "none";
                 document.getElementById("mobileLobby").style.display = "flex"; document.getElementById("waitScreen").style.display = "flex";
-                isJoined = false;
+                
+                // NO LONGER SETTING isJoined = false HERE
             }
         }
 
@@ -417,6 +406,10 @@
             document.getElementById("playScreen").style.display = "none";
             document.getElementById("waitScreen").style.backgroundColor = "#333";
             
+            document.getElementById("waitTitle").innerHTML = `Answer Locked! (${choice}) 🔒`;
+            document.getElementById("waitTimerDisplay").style.display = "inline-block"; 
+            document.getElementById("waitMsg").innerHTML = "";
+
             if (isPollActive) {
                 updatePollWaitingScreen();
                 socket.emit('submitAnswer', { pointsEarned: 0, choice: choice, isPoll: true });

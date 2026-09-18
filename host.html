@@ -18,55 +18,24 @@
         
         select { padding: 10px; font-size: 16px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; }
 
-        /* --- NEW DESIGNER JOIN BANNER --- */
         .join-banner {
-            background: linear-gradient(135deg, #46178f, #2b0c5e);
-            color: white;
-            border-radius: 16px;
-            padding: 25px 45px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 40px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            margin-bottom: 25px;
-            text-align: left;
-            max-width: 900px;
+            background: linear-gradient(135deg, #46178f, #2b0c5e); color: white; border-radius: 16px; padding: 25px 45px; display: inline-flex; align-items: center; justify-content: center; gap: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-bottom: 25px; text-align: left; max-width: 900px;
         }
         .join-text h3 { margin: 0 0 10px 0; font-size: 32px; color: #ffd700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .join-text p { margin: 0 0 15px 0; font-size: 20px; font-weight: bold; opacity: 0.9; }
-        .join-url { 
-            background: rgba(255,255,255,0.15); 
-            padding: 12px 25px; 
-            border-radius: 8px; 
-            font-size: 26px; 
-            font-weight: bold; 
-            letter-spacing: 1px; 
-            display: inline-block;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-        .join-qr { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4); 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        .join-url { background: rgba(255,255,255,0.15); padding: 12px 25px; border-radius: 8px; font-size: 26px; font-weight: bold; letter-spacing: 1px; display: inline-block; border: 2px solid rgba(255,255,255,0.3); }
+        .join-qr { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; }
         .join-qr span { color: #46178f; font-weight: bold; font-size: 14px; margin-top: 8px; }
 
-        #qDisplay { font-size: 36px; font-weight: bold; margin: 20px auto; color: #333; min-height: 80px; background: rgba(255,255,255,0.9); padding: 20px 40px; border-radius: 12px; display: inline-block; max-width: 90%;}
+        #qDisplay { font-size: 36px; font-weight: bold; margin: 20px auto 10px auto; color: #333; min-height: 80px; background: rgba(255,255,255,0.9); padding: 20px 40px; border-radius: 12px; display: inline-block; max-width: 90%;}
         
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 900px; margin: 0 auto; display: none; }
         .opt-card { padding: 20px; font-size: 20px; color: white; border-radius: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; font-weight: bold; text-align: left; overflow: hidden; transition: all 0.3s ease;}
         .opt-card .content-wrap { display: flex; align-items: center; }
         .opt-card span.shape { font-size: 30px; margin-right: 15px; min-width: 35px; text-align: center; flex-shrink: 0;}
         
-        #optA { background: #e21b3c; } #optB { background: #1368ce; }
-        #optC { background: #d89e00; } #optD { background: #26890c; }
+        #optA { background: #e21b3c; } #optB { background: #1368ce; } #optC { background: #d89e00; } #optD { background: #26890c; }
         
-        /* --- BEAUTIFUL ANIMATED LEADERBOARD TILES --- */
         .leaderboard { background: transparent; padding: 20px 0; max-width: 700px; margin: 20px auto; display: none; }
         #hostLeaderboardList { position: relative; width: 100%; transition: height 0.3s ease; }
         .lb-tile { position: absolute; left: 0; width: 100%; height: 70px; transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; justify-content: space-between; align-items: center; background: white; color: #333; border-radius: 12px; padding: 0 25px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -116,7 +85,6 @@
         </div>
     </div>
 
-    <!-- Designer Stage Banner -->
     <div class="join-banner">
         <div class="join-text">
             <h3>Ready to Play?</h3>
@@ -129,7 +97,6 @@
         </div>
     </div>
 
-    <!-- Print Modal -->
     <div id="qrModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center;">
         <div style="background:white; padding:40px; border-radius:12px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.3); max-width:420px; width:90%;">
             <h2 style="margin-top:0; color:#333; font-size:28px;">Scan to Join Quiz! 📱</h2>
@@ -149,6 +116,11 @@
     <div id="playerCounter">Players Joined: 0</div>
     <div id="waitingRoom" class="waiting-room"></div>
     <h2 id="qDisplay">Ready to Start!</h2>
+    
+    <!-- BIG HOST TIMER -->
+    <div id="hostTimerContainer" style="display:none; justify-content:center; margin-bottom: 25px;">
+        <div id="hostTimer" style="font-size: 55px; font-weight: bold; background: #e21b3c; color: white; border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 4px solid white;">15</div>
+    </div>
 
     <div class="options-grid" id="optionsGrid">
         <div class="opt-card" id="optA">
@@ -187,26 +159,12 @@
             let hostUrl = window.location.origin;
             const playerUrl = hostUrl + "/index.html"; 
             
-            // Clean up the URL for the display banner so it's easy to read
             let cleanUrl = playerUrl.replace(/^https?:\/\//, '');
             document.getElementById('displayUrl').innerText = cleanUrl;
             document.getElementById('qrUrlText').innerText = cleanUrl;
             
-            // Generate Premium Tinted QR Codes
-            new QRious({ 
-                element: document.getElementById('qrCodeCanvasModal'), 
-                value: playerUrl, 
-                size: 260,
-                foreground: '#46178f', // Brand purple
-                level: 'H' // High error correction
-            });
-            new QRious({ 
-                element: document.getElementById('qrCodeCanvas'), 
-                value: playerUrl, 
-                size: 150,
-                foreground: '#46178f',
-                level: 'H'
-            });
+            new QRious({ element: document.getElementById('qrCodeCanvasModal'), value: playerUrl, size: 260, foreground: '#46178f', level: 'H' });
+            new QRious({ element: document.getElementById('qrCodeCanvas'), value: playerUrl, size: 150, foreground: '#46178f', level: 'H' });
         });
 
         function openQrModal() { document.getElementById('qrModal').style.display = 'flex'; }
@@ -215,6 +173,7 @@
         let currentIndex = -1;
         let finalWinners = [];
         let questionTimer; 
+        let hostTimerInterval; // Interval for the host's large ticking timer
         let isCurrentPoll = false;
         
         const trialQuestions = [
@@ -243,6 +202,8 @@
             quizQuestions = (mode === "trial") ? trialQuestions : mainQuizQuestions;
             currentIndex = -1;
             clearTimeout(questionTimer);
+            clearInterval(hostTimerInterval);
+            document.getElementById("hostTimerContainer").style.display = "none";
             document.getElementById("qDisplay").innerText = `Loaded ${quizQuestions.length} items. Ready to Start!`;
             document.getElementById("nextBtn").innerText = mode === "trial" ? "Start Trial Quiz" : "Start Quiz";
             document.getElementById("nextBtn").style.display = "inline-block";
@@ -259,6 +220,9 @@
 
         function handleTimeUp() {
             clearTimeout(questionTimer);
+            clearInterval(hostTimerInterval);
+            document.getElementById("hostTimerContainer").style.display = "none";
+            
             const currentQ = quizQuestions[currentIndex];
 
             if (isCurrentPoll) {
@@ -281,6 +245,7 @@
 
         document.getElementById("nextBtn").onclick = () => {
             clearTimeout(questionTimer); 
+            clearInterval(hostTimerInterval);
             
             ['A', 'B', 'C', 'D'].forEach(opt => {
                 const el = document.getElementById(`opt${opt}`);
@@ -293,6 +258,7 @@
             
             if(currentIndex >= quizQuestions.length) {
                 document.getElementById("qDisplay").innerText = "Quiz Finished! Here are the Winners!";
+                document.getElementById("hostTimerContainer").style.display = "none";
                 document.getElementById("optionsGrid").style.display = "none";
                 document.getElementById("leaderboard").style.display = "none";
                 document.getElementById("nextBtn").style.display = "none"; 
@@ -331,7 +297,7 @@
             document.getElementById("podium").style.display = "none";
             document.getElementById("optionsGrid").style.display = "grid";
             document.getElementById("waitingRoom").style.display = "none"; 
-            document.querySelector(".join-banner").style.display = "none"; // Hide banner during active play
+            document.querySelector(".join-banner").style.display = "none"; 
             
             let qTime = parseInt(currentQ.time) || 15;
             let questionStatus = isCurrentPoll ? "poll" : "active";
@@ -342,11 +308,24 @@
                 status: questionStatus, questionText: currentQ.q, ansA: currentQ.a, ansB: currentQ.b, ansC: currentQ.c, ansD: currentQ.d, correctAnswer: currentQ.correct, timer: qTime
             });
 
+            // Start the visual countdown on Host Screen
+            document.getElementById("hostTimerContainer").style.display = "flex";
+            let timeLeft = qTime;
+            document.getElementById("hostTimer").innerText = timeLeft;
+            hostTimerInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    document.getElementById("hostTimer").innerText = timeLeft;
+                }
+            }, 1000);
+
             questionTimer = setTimeout(() => handleTimeUp(), qTime * 1000);
         };
 
         document.getElementById("leaderboardBtn").onclick = () => {
             clearTimeout(questionTimer); 
+            clearInterval(hostTimerInterval);
+            document.getElementById("hostTimerContainer").style.display = "none";
             
             if (isCurrentPoll) {
                 alert("Polls don't have scores! Click 'Next Question' to move on.");
@@ -361,6 +340,8 @@
         document.getElementById("resetBtn").onclick = () => {
             if(confirm("Reset all scores to zero and restart?")) {
                 clearTimeout(questionTimer);
+                clearInterval(hostTimerInterval);
+                document.getElementById("hostTimerContainer").style.display = "none";
                 currentIndex = -1;
                 isCurrentPoll = false;
                 document.getElementById("qDisplay").innerText = `Loaded ${quizQuestions.length} items. Ready to Start!`;
@@ -392,7 +373,6 @@
             document.getElementById("voteTextD").innerText = `${votes.D} votes`; document.getElementById("barD").style.width = `${pD}%`;
         }
 
-        // DOM Animation Logic for Host Leaderboard
         function renderAnimatedLeaderboard(containerId, playersArray) {
             const container = document.getElementById(containerId);
             const tileHeight = 85; 
